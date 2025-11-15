@@ -1,7 +1,8 @@
 // app/demos/barbiere/page.tsx
- // se ti dà errore cambia il percorso, vedi nota sotto
 
-import ChatBox from "../../components/chatbox"; export default function BarbiereDemo() {
+import ChatBox from "../../components/chatbox";
+
+export default function BarbiereDemo() {
   return (
     <main
       style={{
@@ -26,7 +27,7 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
               letterSpacing: 0.4,
             }}
           >
-            GalaxBot AI × Barbiere / Parrucchiere 💈✂️
+            GalaxBot AI × Barber Shop 💈✂️
           </h1>
           <p
             style={{
@@ -37,13 +38,13 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
               fontSize: "0.98rem",
             }}
           >
-            Il tuo assistente intelligente che gestisce appuntamenti, listino
-            servizi, promozioni e messaggi dei clienti in automatico, su
-            WhatsApp, Instagram o sito web.
+            Questo è un demo interattivo del chatbot per barbieri e parrucchieri.
+            Risponde ai clienti, gestisce prenotazioni, orari, listino servizi e ti libera dal telefono.
+            Provalo qui sotto come se fosse il tuo salone.
           </p>
         </header>
 
-        {/* TRE CARDS SERVIZI */}
+        {/* CARDS SERVIZI */}
         <section
           style={{
             display: "grid",
@@ -67,8 +68,7 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
               📅 Prenotazioni automatiche
             </div>
             <div style={{ opacity: 0.9 }}>
-              Appuntamenti confermati in automatico 24/7, senza rispondere a
-              ogni messaggio.
+              Il bot raccoglie richieste di appuntamento e ti evita ore al telefono.
             </div>
           </div>
 
@@ -84,11 +84,10 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
             }}
           >
             <div style={{ fontWeight: 600, marginBottom: 4 }}>
-              💇 Info su tagli e trattamenti
+              💇 Info chiare per i clienti
             </div>
             <div style={{ opacity: 0.9 }}>
-              Il bot spiega listino prezzi, durata dei trattamenti, regole del
-              salone e promozioni.
+              Spiega trattamenti, durata e prezzi in modo professionale e sempre uguale.
             </div>
           </div>
 
@@ -104,11 +103,10 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
             }}
           >
             <div style={{ fontWeight: 600, marginBottom: 4 }}>
-              📲 WhatsApp & Instagram
+              🕒 Sempre disponibile 24/7
             </div>
             <div style={{ opacity: 0.9 }}>
-              Risponde ai clienti dove scrivono davvero: WhatsApp Business,
-              Instagram DM o sito web.
+              Risponde anche quando sei pieno, chiuso o in ferie. Nessun messaggio rimane senza risposta.
             </div>
           </div>
         </section>
@@ -127,9 +125,7 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
               marginBottom: "14px",
             }}
           >
-            ⚠️ Questo è un demo. Nel progetto reale il bot è collegato al tuo
-            salone: prezzi, disponibilità, regole e messaggi automatici su
-            misura.
+            Nella versione completa personalizziamo tutto sul tuo salone.
           </p>
 
           <div
@@ -155,7 +151,7 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
                 boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
               }}
             >
-              Voglio un chatbot come questo
+              Voglio un chatbot per il mio salone
             </a>
 
             <a
@@ -176,7 +172,38 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
             >
               Scrivimi su Instagram
             </a>
+
+            {/* BOTTONE ABBONAMENTO */}
+            <a
+              href="https://buy.stripe.com/5kQ4gzbY30Vi6sP6uab3q02"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                borderRadius: 9999,
+                padding: "11px 22px",
+                background: "#ffdd00",
+                color: "#000000",
+                fontWeight: 700,
+                fontSize: "0.95rem",
+                textDecoration: "none",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+                display: "inline-block",
+              }}
+            >
+              Attiva l’abbonamento (10€ il primo mese)
+            </a>
           </div>
+
+          {/* TESTO PROMO */}
+          <p
+            style={{
+              fontSize: "0.85rem",
+              opacity: 0.9,
+              marginTop: "8px",
+            }}
+          >
+            👉 Usa il codice promo <strong>PROMO10</strong> e paghi solo <strong>10€</strong> il primo mese.
+          </p>
         </section>
 
         {/* TITOLO CHAT */}
@@ -189,27 +216,13 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
           >
             Prova il chatbot in tempo reale 💬
           </h2>
-          <p
-            style={{
-              fontSize: "0.85rem",
-              opacity: 0.8,
-            }}
-          >
-            Esempi:{" "}
-            <span style={{ opacity: 0.9 }}>
-              “Posso prenotare un taglio domani?”, “Avete posto sabato
-              pomeriggio?”, “Quanto costa taglio + barba?”
-            </span>
+          <p style={{ fontSize: "0.85rem", opacity: 0.8 }}>
+            Esempi: “Posso prenotare un taglio domani?”, “Avete posto sabato?”, “Quanto costa taglio + barba?”
           </p>
         </section>
 
-        {/* BOX CHAT CON CORNICE ROSSO/BLU */}
-        <section
-          style={{
-            marginTop: "10px",
-            marginBottom: "8px",
-          }}
-        >
+        {/* BOX CHAT */}
+        <section style={{ marginTop: "10px", marginBottom: "8px" }}>
           <div
             style={{
               padding: "2px",
@@ -231,7 +244,7 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
           </div>
         </section>
 
-        {/* MICRO-NOTA SOTTO LA CHAT */}
+        {/* NOTA FINALE */}
         <p
           style={{
             fontSize: "0.78rem",
@@ -240,9 +253,8 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
             marginTop: "8px",
           }}
         >
-          Questo è un demo. Nel progetto reale colleghiamo il bot al tuo
-          WhatsApp Business, Instagram o gestionale per gestire davvero
-          prenotazioni e clienti.
+          Questo è solo un esempio. Nel progetto reale il bot si collega al tuo WhatsApp Business e Instagram,
+          con pannello per gestire servizi, prezzi, orari, ferie e appuntamenti.
         </p>
       </div>
     </main>
