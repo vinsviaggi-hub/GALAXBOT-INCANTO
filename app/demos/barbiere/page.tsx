@@ -1,7 +1,8 @@
 // app/demos/barbiere/page.tsx
- // se ti dà errore cambia il percorso, vedi nota sotto
 
-import ChatBox from "../../components/chatbox"; export default function BarbiereDemo() {
+import ChatBox from "../../components/chatbox";
+
+export default function BarbiereDemo() {
   return (
     <main
       style={{
@@ -43,7 +44,7 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
           </p>
         </header>
 
-        {/* TRE CARDS SERVIZI */}
+        {/* TRE CARDS */}
         <section
           style={{
             display: "grid",
@@ -113,13 +114,8 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
           </div>
         </section>
 
-        {/* AVVISO DEMO + PULSANTI */}
-        <section
-          style={{
-            textAlign: "center",
-            marginBottom: "26px",
-          }}
-        >
+        {/* AVVISO + PULSANTI */}
+        <section style={{ textAlign: "center", marginBottom: "26px" }}>
           <p
             style={{
               fontSize: "0.86rem",
@@ -140,6 +136,7 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
               flexWrap: "wrap",
             }}
           >
+            {/* PULSANTE 1 — CHATBOT */}
             <a
               href="https://www.instagram.com/galaxbot_ai?igsh=MW9zNmNlcmtuMHE3cA%3D%3D&utm_source=qr"
               target="_blank"
@@ -158,6 +155,7 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
               Voglio un chatbot come questo
             </a>
 
+            {/* PULSANTE 2 — INSTAGRAM */}
             <a
               href="https://www.instagram.com/galaxbot_ai?igsh=MW9zNmNlcmtuMHE3cA%3D%3D&utm_source=qr"
               target="_blank"
@@ -175,26 +173,29 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
               }}
             >
               Scrivimi su Instagram
-<a
-  href="https://buy.stripe.com/5kQ4gzby3tV6sP6uab"
-  target="_blank"
-  rel="noopener noreferrer"
-  style={{
-    borderRadius: 9999,
-    padding: "11px 22px",
-    background: "#ffdd00",
-    color: "#000000",
-    fontWeight: 700,
-    fontSize: "0.95rem",
-    textDecoration: "none",
-    boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
-    marginTop: "12px",
-    display: "inline-block",
-  }}
->
-  Attiva l’abbonamento (10€ il primo mese)
-</a>    
-           /div>
+            </a>
+
+            {/* PULSANTE 3 — STRIPE */}
+            <a
+              href="https://buy.stripe.com/5kQ4gzby3tV6sP6uab"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                borderRadius: 9999,
+                padding: "11px 22px",
+                background: "#ffdd00",
+                color: "#000000",
+                fontWeight: 700,
+                fontSize: "0.95rem",
+                textDecoration: "none",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+                marginTop: "12px",
+                display: "inline-block",
+              }}
+            >
+              Attiva l’abbonamento (10€ il primo mese)
+            </a>
+          </div>
         </section>
 
         {/* TITOLO CHAT */}
@@ -221,13 +222,8 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
           </p>
         </section>
 
-        {/* BOX CHAT CON CORNICE ROSSO/BLU */}
-        <section
-          style={{
-            marginTop: "10px",
-            marginBottom: "8px",
-          }}
-        >
+        {/* BOX CHAT */}
+        <section style={{ marginTop: "10px", marginBottom: "8px" }}>
           <div
             style={{
               padding: "2px",
@@ -249,7 +245,7 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
           </div>
         </section>
 
-        {/* MICRO-NOTA SOTTO LA CHAT */}
+        {/* NOTA FINALE */}
         <p
           style={{
             fontSize: "0.78rem",
@@ -259,8 +255,7 @@ import ChatBox from "../../components/chatbox"; export default function Barbiere
           }}
         >
           Questo è un demo. Nel progetto reale colleghiamo il bot al tuo
-          WhatsApp Business, Instagram o gestionale per gestire davvero
-          prenotazioni e clienti.
+          WhatsApp Business, Instagram o gestionale.
         </p>
       </div>
     </main>
