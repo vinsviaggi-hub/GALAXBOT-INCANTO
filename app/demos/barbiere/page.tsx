@@ -2,6 +2,9 @@
 
 import ChatBox from "../../components/chatbox";
 
+import ChatBox from "../../components/chatbox";
+
+export default function BarbiereDemo() {
 export default function BarbiereDemo() {
   return (
     <main
@@ -45,6 +48,7 @@ export default function BarbiereDemo() {
         </header>
 
         {/* CARDS SERVIZI */}
+        {/* TRE CARDS */}
         <section
           style={{
             display: "grid",
@@ -111,13 +115,8 @@ export default function BarbiereDemo() {
           </div>
         </section>
 
-        {/* AVVISO DEMO + PULSANTI */}
-        <section
-          style={{
-            textAlign: "center",
-            marginBottom: "26px",
-          }}
-        >
+        {/* AVVISO + PULSANTI */}
+        <section style={{ textAlign: "center", marginBottom: "26px" }}>
           <p
             style={{
               fontSize: "0.86rem",
@@ -136,6 +135,7 @@ export default function BarbiereDemo() {
               flexWrap: "wrap",
             }}
           >
+            {/* PULSANTE 1 — CHATBOT */}
             <a
               href="https://www.instagram.com/galaxbot_ai?igsh=MW9zNmNlcmtuMHE3cA%3D%3D&utm_source=qr"
               target="_blank"
@@ -154,6 +154,7 @@ export default function BarbiereDemo() {
               Voglio un chatbot per il mio salone
             </a>
 
+            {/* PULSANTE 2 — INSTAGRAM */}
             <a
               href="https://www.instagram.com/galaxbot_ai?igsh=MW9zNmNlcmtuMHE3cA%3D%3D&utm_source=qr"
               target="_blank"
@@ -192,6 +193,27 @@ export default function BarbiereDemo() {
             >
               Attiva l’abbonamento (10€ il primo mese)
             </a>
+
+            {/* PULSANTE 3 — STRIPE */}
+            <a
+              href="https://buy.stripe.com/5kQ4gzby3tV6sP6uab"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                borderRadius: 9999,
+                padding: "11px 22px",
+                background: "#ffdd00",
+                color: "#000000",
+                fontWeight: 700,
+                fontSize: "0.95rem",
+                textDecoration: "none",
+                boxShadow: "0 10px 30px rgba(0,0,0,0.4)",
+                marginTop: "12px",
+                display: "inline-block",
+              }}
+            >
+              Attiva l’abbonamento (10€ il primo mese)
+            </a>
           </div>
 
           {/* TESTO PROMO */}
@@ -223,6 +245,8 @@ export default function BarbiereDemo() {
 
         {/* BOX CHAT */}
         <section style={{ marginTop: "10px", marginBottom: "8px" }}>
+        {/* BOX CHAT */}
+        <section style={{ marginTop: "10px", marginBottom: "8px" }}>
           <div
             style={{
               padding: "2px",
@@ -245,6 +269,7 @@ export default function BarbiereDemo() {
         </section>
 
         {/* NOTA FINALE */}
+        {/* NOTA FINALE */}
         <p
           style={{
             fontSize: "0.78rem",
@@ -255,6 +280,8 @@ export default function BarbiereDemo() {
         >
           Questo è solo un esempio. Nel progetto reale il bot si collega al tuo WhatsApp Business e Instagram,
           con pannello per gestire servizi, prezzi, orari, ferie e appuntamenti.
+          Questo è un demo. Nel progetto reale colleghiamo il bot al tuo
+          WhatsApp Business, Instagram o gestionale.
         </p>
       </div>
     </main>
