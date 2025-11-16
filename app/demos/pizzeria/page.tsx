@@ -6,8 +6,8 @@ export default function PizzeriaDemo() {
       style={{
         minHeight: "100vh",
         background:
-          "radial-gradient(circle at top, #ff9a3c 0, #1a0b2e 55%, #050816 100%)",
-        color: "#ffffff",
+          "radial-gradient(circle at top, #f97316 0, #0f172a 45%, #020617 100%)",
+        color: "#f9fafb",
         fontFamily:
           "system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif",
         padding: "32px 16px 40px",
@@ -15,18 +15,42 @@ export default function PizzeriaDemo() {
         justifyContent: "center",
       }}
     >
-      <div style={{ width: "100%", maxWidth: 960 }}>
-        {/* TITOLO */}
-        <header style={{ textAlign: "center", marginBottom: "26px" }}>
+      <div style={{ width: "100%", maxWidth: 980 }}>
+        {/* HEADER */}
+        <header
+          style={{
+            textAlign: "center",
+            marginBottom: "30px",
+          }}
+        >
+          <div
+            style={{
+              display: "inline-flex",
+              padding: "6px 14px",
+              borderRadius: 9999,
+              fontSize: "0.78rem",
+              letterSpacing: 1,
+              textTransform: "uppercase",
+              background: "rgba(15,23,42,0.9)",
+              border: "1px solid rgba(248,250,252,0.16)",
+              marginBottom: 12,
+              opacity: 0.9,
+            }}
+          >
+            Demo settore pizzeria · GalaxBot AI
+          </div>
+
           <h1
             style={{
-              fontSize: "2.3rem",
-              marginBottom: "8px",
+              fontSize: "2.5rem",
+              marginBottom: "10px",
               letterSpacing: 0.4,
+              textShadow: "0 18px 40px rgba(0,0,0,0.7)",
             }}
           >
             GalaxBot AI × Pizzeria 🍕
           </h1>
+
           <p
             style={{
               opacity: 0.9,
@@ -37,96 +61,166 @@ export default function PizzeriaDemo() {
             }}
           >
             Esempio di come GalaxBot AI può lavorare per una pizzeria: risponde
-            ai clienti, gestisce prenotazioni, ordini e info su consegne in
-            automatico, 24 ore su 24.
+            ai clienti, gestisce prenotazioni, ordini e informazioni su consegne
+            in automatico, 24 ore su 24. Tu pensi solo ad infornare.
           </p>
         </header>
 
-        {/* 3 CARDS */}
+        {/* 3 CARDS SERVIZI */}
         <section
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
             gap: "14px",
-            marginBottom: "24px",
+            marginBottom: "26px",
           }}
         >
+          {/* CARD 1 */}
           <div
             style={{
-              padding: "14px 16px",
-              borderRadius: 16,
+              padding: "16px 16px",
+              borderRadius: 18,
               background:
-                "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(0,0,0,0.2))",
-              boxShadow: "0 12px 35px rgba(0,0,0,0.45)",
-              border: "1px solid rgba(255,255,255,0.22)",
+                "linear-gradient(145deg, rgba(15,23,42,0.98), rgba(30,64,175,0.9))",
+              boxShadow: "0 18px 40px rgba(0,0,0,0.6)",
+              border: "1px solid rgba(248,250,252,0.16)",
               fontSize: "0.9rem",
             }}
           >
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>
-              🍕 Ordini e prenotazioni
+            <div
+              style={{
+                fontWeight: 600,
+                marginBottom: 6,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 9999,
+                  background: "rgba(248,250,252,0.12)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.9rem",
+                }}
+              >
+                🍕
+              </span>
+              <span>Ordini e prenotazioni</span>
             </div>
             <div style={{ opacity: 0.9 }}>
-              Il bot prende ordini, prenota tavoli e conferma in automatico,
-              senza chiamate perse.
+              Il bot prende ordini d&apos;asporto, prenota tavoli e conferma in
+              automatico, senza telefonate perse.
             </div>
           </div>
 
+          {/* CARD 2 */}
           <div
             style={{
-              padding: "14px 16px",
-              borderRadius: 16,
+              padding: "16px 16px",
+              borderRadius: 18,
               background:
-                "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(0,0,0,0.2))",
-              boxShadow: "0 12px 35px rgba(0,0,0,0.45)",
-              border: "1px solid rgba(255,255,255,0.22)",
+                "linear-gradient(145deg, rgba(15,23,42,0.98), rgba(190,24,93,0.9))",
+              boxShadow: "0 18px 40px rgba(0,0,0,0.6)",
+              border: "1px solid rgba(248,250,252,0.16)",
               fontSize: "0.9rem",
             }}
           >
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>
-              📍 Info rapide ai clienti
+            <div
+              style={{
+                fontWeight: 600,
+                marginBottom: 6,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 9999,
+                  background: "rgba(248,250,252,0.12)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.9rem",
+                }}
+              >
+                📍
+              </span>
+              <span>Info rapide ai clienti</span>
             </div>
             <div style={{ opacity: 0.9 }}>
-              Orari, indirizzo, consegna a domicilio, coperto, allergeni e
-              promozioni spiegati dal bot in modo chiaro.
+              Orari, indirizzo, coperto, consegna a domicilio, allergeni e
+              promozioni: tutto spiegato dal bot in pochi secondi.
             </div>
           </div>
 
+          {/* CARD 3 */}
           <div
             style={{
-              padding: "14px 16px",
-              borderRadius: 16,
+              padding: "16px 16px",
+              borderRadius: 18,
               background:
-                "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(0,0,0,0.2))",
-              boxShadow: "0 12px 35px rgba(0,0,0,0.45)",
-              border: "1px solid rgba(255,255,255,0.22)",
+                "linear-gradient(145deg, rgba(15,23,42,0.98), rgba(22,163,74,0.9))",
+              boxShadow: "0 18px 40px rgba(0,0,0,0.6)",
+              border: "1px solid rgba(248,250,252,0.16)",
               fontSize: "0.9rem",
             }}
           >
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>
-              📲 WhatsApp, Instagram o sito
+            <div
+              style={{
+                fontWeight: 600,
+                marginBottom: 6,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+              }}
+            >
+              <span
+                style={{
+                  width: 22,
+                  height: 22,
+                  borderRadius: 9999,
+                  background: "rgba(248,250,252,0.12)",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "0.9rem",
+                }}
+              >
+                📲
+              </span>
+              <span>WhatsApp, Instagram o sito</span>
             </div>
             <div style={{ opacity: 0.9 }}>
               Il bot risponde dove scrivono davvero i tuoi clienti: WhatsApp,
-              Instagram DM o sito web.
+              Instagram DM o direttamente dal sito web.
             </div>
           </div>
         </section>
 
-        {/* SPIEGAZIONE */}
+        {/* BOX GRANDE SPIEGAZIONE */}
         <section
           style={{
-            marginBottom: "22px",
-            padding: "16px 14px",
-            borderRadius: 18,
+            marginBottom: "26px",
+            padding: "18px 18px",
+            borderRadius: 22,
             background:
-              "linear-gradient(135deg, rgba(255,255,255,0.08), rgba(0,0,0,0.6))",
-            border: "1px solid rgba(255,255,255,0.2)",
+              "linear-gradient(145deg, rgba(15,23,42,0.96), rgba(15,23,42,0.92))",
+            border: "1px solid rgba(148,163,184,0.4)",
+            boxShadow: "0 24px 70px rgba(0,0,0,0.75)",
           }}
         >
           <h2
             style={{
               fontSize: "1.15rem",
-              marginBottom: "8px",
+              marginBottom: "10px",
             }}
           >
             Cosa potrebbe fare nella tua pizzeria?
@@ -140,39 +234,43 @@ export default function PizzeriaDemo() {
             }}
           >
             <li>Gestire richieste su menù, impasti, glutine e allergeni.</li>
-            <li>Prendere ordini d’asporto e indicare tempi di consegna.</li>
-            <li>Gestire prenotazioni tavoli e conferme automatiche.</li>
-            <li>Comunicare promozioni, serate speciali e novità.</li>
+            <li>Prendere ordini d&apos;asporto e indicare i tempi di consegna.</li>
+            <li>Gestire prenotazioni tavoli e inviare conferme automatiche.</li>
+            <li>
+              Comunicare promozioni, serate speciali, menù fisso, formule
+              &quot;all you can eat&quot; e serate evento.
+            </li>
           </ul>
           <p
             style={{
-              marginTop: "10px",
+              marginTop: "12px",
               fontSize: "0.85rem",
               opacity: 0.8,
             }}
           >
-            Questo è un esempio statico. Il chatbot effettivo sarà collegato ai
-            tuoi orari, alle tue regole e al tuo menù.
+            Questo è un esempio statico. Nel progetto reale il chatbot viene
+            collegato ai tuoi orari, alle tue regole, al tuo menù e – se vuoi –
+            al gestionale o a un foglio ordini.
           </p>
         </section>
 
-        {/* CTA */}
+        {/* CTA FINALE */}
         <section
           style={{
             textAlign: "center",
-            marginBottom: "8px",
           }}
         >
           <p
             style={{
-              fontSize: "0.92rem",
+              fontSize: "0.94rem",
               opacity: 0.9,
-              marginBottom: "14px",
+              marginBottom: "16px",
             }}
           >
-            Vuoi vedere la chat in azione? Guarda il demo completo per
-            barbieri (stesso motore, adattato al tuo settore) oppure
-            scrivimi direttamente.
+            Vuoi vedere una chat che risponde davvero da sola? Guarda il{" "}
+            <span style={{ fontWeight: 600 }}>demo completo per barbieri</span>{" "}
+            (stesso motore, adattato al tuo settore) oppure scrivimi su
+            Instagram.
           </p>
 
           <div
@@ -187,13 +285,13 @@ export default function PizzeriaDemo() {
               href="/demos/barbiere"
               style={{
                 borderRadius: 9999,
-                padding: "11px 22px",
+                padding: "11px 24px",
                 background: "#16a3ff",
                 color: "#ffffff",
                 fontWeight: 600,
                 fontSize: "0.95rem",
                 textDecoration: "none",
-                boxShadow: "0 10px 30px rgba(0,0,0,0.45)",
+                boxShadow: "0 18px 40px rgba(15,118,230,0.8)",
               }}
             >
               👀 Guarda il demo con chat
@@ -205,17 +303,18 @@ export default function PizzeriaDemo() {
               rel="noopener noreferrer"
               style={{
                 borderRadius: 9999,
-                padding: "11px 22px",
-                border: "1px solid rgba(255,255,255,0.6)",
-                color: "#ffffff",
+                padding: "11px 24px",
+                border: "1px solid rgba(148,163,184,0.9)",
+                color: "#e5e7eb",
                 fontWeight: 500,
                 fontSize: "0.95rem",
                 textDecoration: "none",
-                background: "rgba(0,0,0,0.25)",
-                backdropFilter: "blur(6px)",
+                background:
+                  "linear-gradient(145deg, rgba(15,23,42,0.9), rgba(15,23,42,0.7))",
+                backdropFilter: "blur(8px)",
               }}
             >
-              🍕 Scrivimi su Instagram
+              ✉️ Scrivimi su Instagram
             </a>
           </div>
         </section>
