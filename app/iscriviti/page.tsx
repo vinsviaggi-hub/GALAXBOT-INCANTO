@@ -1,3 +1,5 @@
+"use client";
+
 // app/iscriviti/page.tsx
 
 export default function IscrivitiPage() {
