@@ -532,14 +532,11 @@ export default function IscrivitiPage() {
         </div>
       </main>
 
-      {/* STILI RESPONSIVE */}
-      <style jsx>{`
+      {/* STILI RESPONSIVE – normale <style>, NON styled-jsx */}
+      <style>{`
         .iscr-grid {
           display: grid;
-          grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.05fr) minmax(
-              0,
-              0.9fr
-            );
+          grid-template-columns: minmax(0, 1.05fr) minmax(0, 1.05fr) minmax(0, 0.9fr);
           gap: 18px;
           align-items: flex-start;
         }
@@ -550,7 +547,7 @@ export default function IscrivitiPage() {
 
         @media (max-width: 960px) {
           .iscr-main {
-            padding: 24px 12px 32px;
+            padding: 24px 12px 32px !important;
           }
 
           .iscr-grid {
@@ -569,7 +566,7 @@ export default function IscrivitiPage() {
           }
 
           .form-card {
-            max-width: 100%;
+            max-width: 100% !important;
           }
         }
 
