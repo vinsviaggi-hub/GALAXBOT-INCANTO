@@ -3,6 +3,14 @@
 import React from "react";
 
 export default function IscrivitiPage() {
+  const moduloIscrizioneUrl =
+    "https://docs.google.com/forms/d/e/1FAIpQLScaXQvokbWoOWdBtvbj4PZFt10saZ3k_GNi4qF13T41777fIg/viewform?embedded=true";
+
+  const recensioniUrl =
+    "https://docs.google.com/forms/d/e/1FAIpQLSdKA4gx4djL3YUH1rNXjHIqP_MpjSX-m_0jXC8vMRxIWR4sWw/viewform?usp=pp_url";
+
+  const stripeUrl = "https://buy.stripe.com/5kQ4gzbY30Vi6sP6uab3q02";
+
   return (
     <main
       style={{
@@ -89,7 +97,7 @@ export default function IscrivitiPage() {
           >
             Vuoi vedere cosa dicono altre attività?{" "}
             <a
-              href="https://docs.google.com/forms/d/e/1FAIpQLSdKA4gx4djL3YUH1rNXjHIqP_MpjSX-m_0jXC8vMRxIWR4sWw/viewform"
+              href={recensioniUrl}
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -103,7 +111,7 @@ export default function IscrivitiPage() {
           </p>
         </header>
 
-        {/* STEP PICCOLI IN ORIZZONTALE (MA SCORRONO BENE SU MOBILE) */}
+        {/* STEP PICCOLI */}
         <div
           style={{
             display: "flex",
@@ -182,7 +190,7 @@ export default function IscrivitiPage() {
             >
               <iframe
                 title="Modulo iscrizione GalaxBot AI"
-                src="https://docs.google.com/forms/d/e/1FAIpQLScaXQvokbWoOWdBtvbj4PZFt10saZ3k_GNi4qF13T41777fIg/viewform?embedded=true"
+                src={moduloIscrizioneUrl}
                 width="100%"
                 height="520"
                 frameBorder={0}
@@ -247,22 +255,21 @@ export default function IscrivitiPage() {
                 marginBottom: 6,
               }}
             >
-              {/* PRIMA RIGA */}
               <DemoButton href="/demos/barbiere" label="Barbiere / Parrucchiere" />
               <DemoButton href="/demos/bar" label="Bar / Caffetteria" />
               <DemoButton href="/demos/pizzeria" label="Pizzeria" />
               <DemoButton href="/demos/ristorante" label="Ristorante" />
-              {/* SECONDA RIGA */}
               <DemoButton href="/demos/pasticceria" label="Pasticceria / Bakery" />
               <DemoButton href="/demos/gelateria" label="Gelateria" />
               <DemoButton href="/demos/estetica" label="Centro estetico / Beauty" />
               <DemoButton href="/demos/parrucchiera" label="Parrucchiera donna" />
-              {/* TERZA RIGA */}
-              <DemoButton href="/demos/studiomedico" label="Studio medico / Professionisti" />
+              <DemoButton
+                href="/demos/studiomedico"
+                label="Studio medico / Professionisti"
+              />
               <DemoButton href="/demos/dentista" label="Dentista" />
               <DemoButton href="/demos/veterinario" label="Veterinario" />
               <DemoButton href="/demos/hotel" label="Hotel / B&B" />
-              {/* QUARTA RIGA */}
               <DemoButton href="/demos/ecommerce" label="Negozi / E-commerce" />
               <DemoButton href="/demos/palestra" label="Palestra / Fitness" />
               <DemoButton href="/demos/immobiliare" label="Immobiliare" />
@@ -340,7 +347,7 @@ export default function IscrivitiPage() {
               </div>
 
               <a
-                href="https://buy.stripe.com/5kQ4gzbY30Vi6sP6uab3q02"
+                href={stripeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -370,9 +377,21 @@ export default function IscrivitiPage() {
                 }}
               >
                 Nel checkout Stripe inserisci il codice{" "}
-                <strong>PROMO10</strong> nel campo &quot;Codice promozionale&quot; per
-                pagare solo <strong>10€ il primo mese</strong>. Dopo il
-                pagamento ti contatto e configuro il bot sulla tua attività.
+                <strong>PROMO10</strong> nel campo &quot;Codice
+                promozionale&quot; per pagare solo <strong>10€ il primo mese</strong>.
+              </p>
+
+              {/* FRASE SULLA DISDETTA – QUESTA È QUELLA CHE VOLEVI */}
+              <p
+                style={{
+                  fontSize: "0.78rem",
+                  color: "#4b5563",
+                  marginTop: 4,
+                }}
+              >
+                Potrai disdire l&apos;abbonamento in qualsiasi momento dal link
+                al portale clienti Stripe che riceverai via email dopo il
+                pagamento.
               </p>
             </div>
 
@@ -384,6 +403,7 @@ export default function IscrivitiPage() {
                 padding: 12,
                 boxShadow: "0 18px 45px rgba(15,23,42,0.65)",
                 border: "1px solid rgba(15,23,42,0.9)",
+                fontSize: "0.82rem",
               }}
             >
               <h3
@@ -406,7 +426,8 @@ export default function IscrivitiPage() {
               >
                 <li>Configurazione iniziale del bot sulla tua attività.</li>
                 <li>
-                  Collegamento a WhatsApp Business, Instagram o sito (dove possibile).
+                  Collegamento a WhatsApp Business, Instagram o sito (dove
+                  possibile).
                 </li>
                 <li>Gestione messaggi, richieste info e appuntamenti 24/7.</li>
                 <li>
@@ -414,40 +435,37 @@ export default function IscrivitiPage() {
                   tutto in ordine.
                 </li>
               </ul>
-            </div>
 
-            <div
-              style={{
-                marginTop: 4,
-                padding: "8px 10px",
-                borderRadius: 14,
-                background: "rgba(15,23,42,0.90)",
-                color: "#e5e7eb",
-                fontSize: "0.76rem",
-              }}
-            >
-              Proseguendo accetti le condizioni del servizio GalaxBot AI. <br />
-              Leggi{" "}
-              <a
-                href="/termini"
+              <p
                 style={{
-                  color: "#60a5fa",
-                  textDecoration: "underline",
+                  marginTop: 8,
+                  fontSize: "0.78rem",
+                  color: "#e5e7eb",
                 }}
               >
-                Termini d’uso
-              </a>{" "}
-              e{" "}
-              <a
-                href="/privacy"
-                style={{
-                  color: "#60a5fa",
-                  textDecoration: "underline",
-                }}
-              >
-                Informativa privacy
-              </a>
-              .
+                Proseguendo accetti le condizioni del servizio GalaxBot AI.{" "}
+                Leggi{" "}
+                <a
+                  href="/termini"
+                  style={{
+                    color: "#60a5fa",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Termini d’uso
+                </a>{" "}
+                e{" "}
+                <a
+                  href="/privacy"
+                  style={{
+                    color: "#60a5fa",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Informativa privacy
+                </a>
+                .
+              </p>
             </div>
           </div>
         </section>
@@ -458,12 +476,13 @@ export default function IscrivitiPage() {
 
 /** PICCOLI COMPONENTI DI SUPPORTO */
 
-function StepPill(props: {
+type StepPillProps = {
   number: number;
   title: string;
   subtitle: string;
-}) {
-  const { number, title, subtitle } = props;
+};
+
+function StepPill({ number, title, subtitle }: StepPillProps) {
   return (
     <div
       style={{
@@ -501,8 +520,12 @@ function StepPill(props: {
   );
 }
 
-function DemoButton(props: { href: string; label: string }) {
-  const { href, label } = props;
+type DemoButtonProps = {
+  href: string;
+  label: string;
+};
+
+function DemoButton({ href, label }: DemoButtonProps) {
   return (
     <a
       href={href}
