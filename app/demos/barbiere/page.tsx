@@ -195,7 +195,7 @@ export default function BarbiereDemo() {
           >
             {/* BOTTONE MODULO GOOGLE */}
             <a
-              href="https://docs.google.com/forms/d/e/1FAIpQLScaXQvokbWoOWdBtvbj4PZFt10saZ3k_GNi4qF13T41777fIg/viewform?usp=header"
+              href="https://docs.google.com/forms/d/e/1FAIpQLSdovcqFp8fcpmeq5ukeY7Qw4u4Xy7IGzzaYyyHmHQduJCj5Ew/viewform"
               target="_blank"
               rel="noopener noreferrer"
               style={{
