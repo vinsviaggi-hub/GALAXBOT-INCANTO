@@ -1,5 +1,7 @@
 // app/iscriviti/page.tsx
 
+import React from "react";
+
 export const metadata = {
   title: "Iscrizione GalaxBot AI",
   description:
@@ -41,17 +43,17 @@ export default function IscrivitiPage() {
         minHeight: "100vh",
         background:
           "radial-gradient(circle at top, #eef2ff 0, #dfe7fd 25%, #cfd9f9 50%, #c7d2fe 75%, #e5e7eb 100%)",
-        padding: "40px 16px 80px",
+        padding: "32px 12px 56px",
         fontFamily: "system-ui, -apple-system, BlinkMacSystemFont, sans-serif",
       }}
     >
       <div
         style={{
-          maxWidth: "1180px",
+          maxWidth: 1180,
           margin: "0 auto",
         }}
       >
-        {/* Etichetta pagina */}
+        {/* BADGE */}
         <div
           style={{
             display: "inline-flex",
@@ -64,7 +66,7 @@ export default function IscrivitiPage() {
             fontWeight: 500,
             letterSpacing: 0.3,
             textTransform: "uppercase",
-            marginBottom: 12,
+            marginBottom: 10,
           }}
         >
           <span
@@ -79,7 +81,7 @@ export default function IscrivitiPage() {
           <span>Iscrizione servizio · GalaxBot AI</span>
         </div>
 
-        {/* Titolo + testo introduttivo */}
+        {/* TITOLO + INTRO */}
         <h1
           style={{
             fontSize: "clamp(1.9rem, 3vw, 2.35rem)",
@@ -105,8 +107,8 @@ export default function IscrivitiPage() {
           demo del tuo settore e attivi l&apos;abbonamento mensile.
           <br />
           Noi configuriamo il chatbot su WhatsApp, Instagram, sito{" "}
-          <strong>oppure solo come app dedicata</strong> e ti inviamo i link
-          pronti da usare.
+          <strong>oppure solo come app dedicata (link + QR code)</strong> e ti
+          inviamo i link pronti da usare.
         </p>
 
         <a
@@ -121,7 +123,7 @@ export default function IscrivitiPage() {
             color: "#2563eb",
             textDecoration: "none",
             marginTop: 4,
-            marginBottom: 24,
+            marginBottom: 20,
           }}
         >
           Vuoi vedere cosa dicono altre attività?{" "}
@@ -134,23 +136,23 @@ export default function IscrivitiPage() {
           </span>
         </a>
 
-        {/* Stepper 1-2-3 */}
+        {/* STEP 1-2-3 */}
         <div
           style={{
             display: "flex",
             flexWrap: "wrap",
-            gap: 12,
-            marginBottom: 28,
+            gap: 10,
+            marginBottom: 22,
           }}
         >
           <StepPill
             step={1}
             title="Compila il modulo"
-            subtitle="Nome attività, contatti e orari."
+            subtitle="Nome attività, contatti, orari."
           />
           <StepPill
             step={2}
-            title="Scegli il tuo demo"
+            title="Guarda il demo"
             subtitle="Barbiere, pizzeria, studio, ecc."
           />
           <StepPill
@@ -160,32 +162,34 @@ export default function IscrivitiPage() {
           />
         </div>
 
-        {/* Tre colonne principali */}
+        {/* LAYOUT 3 SEZIONI - RESPONSIVE CON FLEX WRAP */}
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0, 1.15fr) minmax(0, 0.95fr) minmax(0, 1.1fr)",
+            display: "flex",
+            flexWrap: "wrap",
             gap: 20,
+            alignItems: "stretch",
           }}
         >
-          {/* COLONNA 1: MODULO ISCRIZIONE */}
+          {/* COLONNA 1: MODULO */}
           <section
             style={{
-              background: "rgba(255,255,255,0.92)",
+              flex: "1 1 360px",
+              minWidth: 0,
+              background: "rgba(255,255,255,0.95)",
               borderRadius: 24,
-              padding: 20,
+              padding: 18,
               boxShadow:
                 "0 18px 45px rgba(15,23,42,0.12), 0 0 0 1px rgba(148,163,184,0.18)",
               display: "flex",
               flexDirection: "column",
-              minHeight: 420,
             }}
           >
             <h2
               style={{
-                fontSize: 18,
+                fontSize: 17,
                 fontWeight: 700,
-                marginBottom: 8,
+                marginBottom: 6,
                 color: "#0f172a",
               }}
             >
@@ -196,12 +200,13 @@ export default function IscrivitiPage() {
                 fontSize: 13,
                 lineHeight: 1.6,
                 color: "#4b5563",
-                marginBottom: 12,
+                marginBottom: 10,
               }}
             >
               Inserisci i dati principali: nome attività, contatti, settore,
-              orari e cosa vuoi che faccia il bot. Usiamo queste informazioni
-              per preparare GalaxBot AI su misura per te.
+              orari, link social e dove vuoi usare il bot (WhatsApp, Instagram,
+              sito o solo app). Usiamo queste informazioni per preparare
+              GalaxBot AI su misura per te.
             </p>
 
             <div
@@ -209,7 +214,7 @@ export default function IscrivitiPage() {
                 flex: 1,
                 borderRadius: 18,
                 overflow: "hidden",
-                border: "1px solid rgba(148,163,184,0.6)",
+                border: "1px solid rgba(148,163,184,0.7)",
                 background: "#f9fafb",
               }}
             >
@@ -229,7 +234,7 @@ export default function IscrivitiPage() {
 
             <p
               style={{
-                marginTop: 10,
+                marginTop: 8,
                 fontSize: 11,
                 color: "#6b7280",
               }}
@@ -243,20 +248,21 @@ export default function IscrivitiPage() {
           {/* COLONNA 2: DEMO SETTORI */}
           <section
             style={{
+              flex: "1 1 300px",
+              minWidth: 0,
               background:
                 "linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.96))",
               borderRadius: 24,
-              padding: 20,
+              padding: 18,
               boxShadow:
                 "0 18px 45px rgba(15,23,42,0.08), 0 0 0 1px rgba(148,163,184,0.16)",
-              minHeight: 420,
             }}
           >
             <h2
               style={{
-                fontSize: 18,
+                fontSize: 17,
                 fontWeight: 700,
-                marginBottom: 8,
+                marginBottom: 6,
                 color: "#0f172a",
               }}
             >
@@ -267,20 +273,21 @@ export default function IscrivitiPage() {
                 fontSize: 13,
                 lineHeight: 1.6,
                 color: "#4b5563",
-                marginBottom: 16,
+                marginBottom: 12,
               }}
             >
-              Apri il demo più vicino alla tua attività per vedere come
-              GalaxBot AI potrebbe lavorare per te. Nel modulo di iscrizione
-              potrai descrivere il bot su misura per il tuo locale.
+              Apri il demo più vicino alla tua attività per vedere come GalaxBot
+              AI potrebbe lavorare per te. Le pagine demo mostrano esempi di
+              messaggi e flussi: la chat in tempo reale è attiva come esempio
+              completo sul demo barbiere.
             </p>
 
             <div
               style={{
                 display: "grid",
                 gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                gap: 10,
-                marginBottom: 10,
+                gap: 8,
+                marginBottom: 8,
               }}
             >
               {demoSettori.map((settore) => (
@@ -316,19 +323,61 @@ export default function IscrivitiPage() {
                 lineHeight: 1.5,
               }}
             >
-              Non trovi il tuo settore? Nel modulo di iscrizione puoi
-              descrivere il tuo caso: adatteremo il bot ai tuoi servizi e alle
-              tue regole. Il canone rimane lo stesso.
+              Non trovi il tuo settore? Nel modulo puoi descrivere il tuo caso:
+              adatteremo il bot ai tuoi servizi e alle tue regole. Il canone
+              rimane lo stesso.
             </p>
+
+            {/* CTA mobile: vedi il demo */}
+            <div
+              style={{
+                marginTop: 12,
+              }}
+            >
+              <a
+                href="/demos/barbiere"
+                style={{
+                  display: "inline-flex",
+                  width: "100%",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderRadius: 999,
+                  padding: "10px 14px",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  textDecoration: "none",
+                  background:
+                    "linear-gradient(135deg, #020617, #0f172a)",
+                  color: "#f9fafb",
+                  boxShadow:
+                    "0 16px 32px rgba(15,23,42,0.55)",
+                }}
+              >
+                👀 Prova la chat demo (barbiere)
+              </a>
+              <p
+                style={{
+                  marginTop: 6,
+                  fontSize: 11,
+                  color: "#6b7280",
+                  lineHeight: 1.4,
+                }}
+              >
+                La chat in tempo reale è un esempio già pronto per barbieri: il
+                bot che riceverai sarà adattato al tuo settore (pizzeria,
+                estetica, studio, ecc.) con i tuoi testi, orari e servizi.
+              </p>
+            </div>
           </section>
 
           {/* COLONNA 3: ABBONAMENTO */}
           <section
             style={{
+              flex: "1 1 300px",
+              minWidth: 0,
               display: "flex",
               flexDirection: "column",
               gap: 14,
-              minHeight: 420,
             }}
           >
             {/* Card prezzo */}
@@ -490,8 +539,8 @@ export default function IscrivitiPage() {
                 <LiPoint>
                   Collegamento a{" "}
                   <strong>WhatsApp Business, Instagram, sito</strong> oppure{" "}
-                  <strong>solo app dedicata</strong> (quando tecnicamente
-                  possibile).
+                  <strong>solo app dedicata</strong> (link + QR code, se lo
+                  preferisci).
                 </LiPoint>
                 <LiPoint>
                   Gestione messaggi, richieste info e appuntamenti 24/7.
@@ -546,7 +595,7 @@ export default function IscrivitiPage() {
   );
 }
 
-/* --- Componenti interni semplici --- */
+/* --- Componenti interni --- */
 
 type StepProps = {
   step: number;
