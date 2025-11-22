@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import ChatBox from "../../components/chatbox";
 
-// 🔗 Link diretto al Google Form di iscrizione
+// Link diretto al Google Form di iscrizione
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSdovcqFp8fcpmeq5ukeY7Qw4u4Xy7IGzzaYyyHmHQduJCj5Ew/viewform?usp=dialog";
 
@@ -28,7 +28,7 @@ export default function BarbiereDemoPage() {
     <main
       style={{
         minHeight: "100vh",
-        padding: isMobile ? "28px 10px 40px" : "40px 16px 60px",
+        padding: isMobile ? "24px 8px 32px" : "40px 16px 60px",
         background:
           "radial-gradient(circle at top, #1d4ed8 0, #020617 55%, #000000 100%)",
         color: "#e5e7eb",
@@ -41,7 +41,7 @@ export default function BarbiereDemoPage() {
       <div
         style={{
           width: "100%",
-          maxWidth: 1040,
+          maxWidth: isMobile ? 480 : 1040, // 🔎 stringiamo tutto su mobile
         }}
       >
         {/* HEADER */}
@@ -71,7 +71,7 @@ export default function BarbiereDemoPage() {
 
           <h1
             style={{
-              fontSize: isMobile ? "1.6rem" : "2rem",
+              fontSize: isMobile ? "1.5rem" : "2rem",
               fontWeight: 800,
               marginBottom: 6,
             }}
@@ -103,7 +103,6 @@ export default function BarbiereDemoPage() {
               justifyContent: "center",
             }}
           >
-            {/* apre direttamente il Google Form */}
             <a
               href={FORM_URL}
               target="_blank"
@@ -146,7 +145,7 @@ export default function BarbiereDemoPage() {
           </div>
         </header>
 
-        {/* CARD PRINCIPALE – layout diverso su mobile / desktop */}
+        {/* CONTENUTO PRINCIPALE */}
         <section
           style={{
             display: isMobile ? "flex" : "grid",
@@ -157,13 +156,13 @@ export default function BarbiereDemoPage() {
             gap: 20,
           }}
         >
-          {/* SINISTRA: chat + prenotazione */}
+          {/* CHAT + PRENOTAZIONE */}
           <div
             style={{
               background:
                 "radial-gradient(circle at top, rgba(15,23,42,0.95), rgba(15,23,42,0.98))",
               borderRadius: 24,
-              padding: isMobile ? 12 : 18,
+              padding: isMobile ? 10 : 18,
               border: "1px solid rgba(148,163,184,0.7)",
               boxShadow: "0 20px 55px rgba(15,23,42,0.95)",
             }}
@@ -177,7 +176,7 @@ export default function BarbiereDemoPage() {
                 gap: 8,
               }}
             >
-              <div style={{ textAlign: isMobile ? "left" : "left" }}>
+              <div>
                 <div
                   style={{
                     fontSize: "0.9rem",
@@ -198,15 +197,23 @@ export default function BarbiereDemoPage() {
               </div>
             </div>
 
-            <ChatBox />
+            {/* 🔎 Limitiamo la larghezza della chat su mobile */}
+            <div
+              style={{
+                maxWidth: isMobile ? 420 : 840,
+                margin: "0 auto",
+              }}
+            >
+              <ChatBox />
+            </div>
           </div>
 
-          {/* DESTRA: testo descrittivo – su mobile va sotto */}
+          {/* TESTO LATERALE (sotto su mobile) */}
           <aside
             style={{
               background: "rgba(15,23,42,0.98)",
               borderRadius: 24,
-              padding: isMobile ? 12 : 16,
+              padding: isMobile ? 10 : 16,
               border: "1px solid rgba(148,163,184,0.5)",
               fontSize: "0.84rem",
               boxShadow: "0 18px 45px rgba(15,23,42,0.9)",
@@ -243,7 +250,7 @@ export default function BarbiereDemoPage() {
               <li>
                 Possiamo adattare lo stesso sistema a pizzerie, bar,
                 pasticcerie, hotel, studi medici, negozi di abbigliamento e
-                tanti altri settori.
+                altri settori.
               </li>
             </ul>
 
