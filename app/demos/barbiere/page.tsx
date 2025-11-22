@@ -1,7 +1,7 @@
 // app/demos/barbiere/page.tsx
 "use client";
 
-import { useState, FormEvent } from "react";
+import { useState, FormEvent, type CSSProperties } from "react";
 import ChatBox from "@/app/components/chatbox";
 
 export default function BarberDemoPage() {
@@ -130,8 +130,8 @@ export default function BarberDemoPage() {
               }}
             >
               Prova il chatbot in tempo reale. Puoi fare domande sui servizi
-              oppure registrare una prenotazione di prova con il box
-              <strong> “Prenotazione veloce dal bot”</strong> qui sotto. Le
+              oppure registrare una prenotazione di prova con il box{" "}
+              <strong>“Prenotazione veloce dal bot”</strong> qui sotto. Le
               prenotazioni di prova finiscono in un foglio Google, come
               succederebbe per il barbiere reale.
             </p>
@@ -179,7 +179,7 @@ export default function BarberDemoPage() {
               {/* CHATBOX */}
               <ChatBox />
 
-              {/* PRENOTAZIONE VELOCE */}
+              {/* PRENOTAZIONE VELOCE – UN SOLO BLOCCO */}
               <div
                 style={{
                   borderRadius: 24,
@@ -212,8 +212,8 @@ export default function BarberDemoPage() {
                 >
                   Compila questi campi e il sistema salva la prenotazione
                   direttamente nel pannello del barbiere (foglio Google di test).
-                  I messaggi scritti nella chat{" "}
-                  <strong>non</strong> creano prenotazioni.
+                  I messaggi scritti nella chat <strong>non</strong> creano
+                  prenotazioni.
                 </p>
 
                 <form
@@ -245,7 +245,7 @@ export default function BarberDemoPage() {
                       </label>
                       <input
                         value={name}
-                        onChange={e => setName(e.target.value)}
+                        onChange={(e) => setName(e.target.value)}
                         placeholder="Es. Marco"
                         style={inputFieldStyle}
                       />
@@ -263,7 +263,7 @@ export default function BarberDemoPage() {
                       </label>
                       <input
                         value={phone}
-                        onChange={e => setPhone(e.target.value)}
+                        onChange={(e) => setPhone(e.target.value)}
                         placeholder="Es. 3331234567"
                         style={inputFieldStyle}
                       />
@@ -283,7 +283,7 @@ export default function BarberDemoPage() {
                     </label>
                     <input
                       value={service}
-                      onChange={e => setService(e.target.value)}
+                      onChange={(e) => setService(e.target.value)}
                       style={inputFieldStyle}
                     />
                   </div>
@@ -309,7 +309,7 @@ export default function BarberDemoPage() {
                       <input
                         type="date"
                         value={date}
-                        onChange={e => setDate(e.target.value)}
+                        onChange={(e) => setDate(e.target.value)}
                         style={inputFieldStyle}
                       />
                     </div>
@@ -327,7 +327,7 @@ export default function BarberDemoPage() {
                       <input
                         type="time"
                         value={time}
-                        onChange={e => setTime(e.target.value)}
+                        onChange={(e) => setTime(e.target.value)}
                         style={inputFieldStyle}
                       />
                     </div>
@@ -346,7 +346,7 @@ export default function BarberDemoPage() {
                     </label>
                     <input
                       value={notes}
-                      onChange={e => setNotes(e.target.value)}
+                      onChange={(e) => setNotes(e.target.value)}
                       placeholder="Es. preferisco la macchinetta"
                       style={inputFieldStyle}
                     />
@@ -465,8 +465,7 @@ export default function BarberDemoPage() {
                     marginBottom: 8,
                     padding: "10px 14px",
                     border: "none",
-                    background:
-                      "linear-gradient(135deg, #22c55e, #a3e635)",
+                    background: "linear-gradient(135deg, #22c55e, #a3e635)",
                     color: "#052e16",
                     fontWeight: 600,
                     fontSize: "0.9rem",
@@ -484,8 +483,7 @@ export default function BarberDemoPage() {
                     borderRadius: 9999,
                     padding: "10px 14px",
                     border: "none",
-                    background:
-                      "linear-gradient(135deg, #f97316, #ef4444)",
+                    background: "linear-gradient(135deg, #f97316, #ef4444)",
                     color: "#111827",
                     fontWeight: 600,
                     fontSize: "0.9rem",
@@ -541,7 +539,7 @@ export default function BarberDemoPage() {
   );
 }
 
-const inputFieldStyle: React.CSSProperties = {
+const inputFieldStyle: CSSProperties = {
   width: "100%",
   borderRadius: 9999,
   border: "1px solid rgba(148,163,184,0.75)",
