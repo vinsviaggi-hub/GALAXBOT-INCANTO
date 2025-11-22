@@ -8,18 +8,24 @@ export const metadata = {
     "Attiva GalaxBot AI per il tuo negozio o studio: compila il modulo, guarda il demo e attiva l’abbonamento.",
 };
 
+// 🔗 Link Stripe per i diversi piani
+const STRIPE_BASE_URL =
+  "https://buy.stripe.com/9B6aEX9PV9rO6sPcSyb3q06"; // Piano Base - Solo bot info (19€/mese)
+
+const STRIPE_APP_CHAT_URL =
+  "https://buy.stripe.com/4gM3cvfafavSg3pf0Gb3q03"; // Piano App + Chat + Prenotazioni (29€/mese, PROMO10)
+
+const STRIPE_WHATSAPP_URL =
+  "https://buy.stripe.com/fZu4gz5zF47u7wT5q6b3q04"; // Piano WhatsApp Business (69€/mese)
+
+const STRIPE_INSTAGRAM_URL =
+  "https://buy.stripe.com/cNi3cve6b33q8AX6uab3q05"; // Piano Instagram Direct (69€/mese)
+
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSdovcqFp8fcpmeq5ukeY7Qw4u4Xy7IGzzaYyyHmHQduJCj5Ew/viewform?embedded=true";
 
 const recensioniUrl =
   "https://docs.google.com/forms/d/e/1FAIpQLSdKA4gx4djL3YUH1rNXjHIqP_MpjSX-m_0jXC8vMRxIWR4sWw/viewform";
-
-// 👉 LINK STRIPE (sostituisci # con i tuoi link reali quando li hai)
-const STRIPE_BASE_URL = "#"; // Piano Base – solo bot info
-const STRIPE_APP_CHAT_URL =
-  "https://buy.stripe.com/5kQ4gzbY30Vi6sP6uab3q02"; // Piano App + Chat (29€/mese)
-const STRIPE_WHATSAPP_URL = "#"; // TODO: inserisci link checkout WhatsApp
-const STRIPE_INSTAGRAM_URL = "#"; // TODO: inserisci link checkout Instagram
 
 const demoSettori: { label: string; href: string }[] = [
   { label: "Barbiere / Parrucchiere", href: "/demos/barbiere" },
@@ -341,8 +347,8 @@ export default function IscrivitiPage() {
             >
               Non trovi il tuo settore? Nel modulo puoi descrivere il tuo caso:
               adatteremo il bot ai tuoi servizi e alle tue regole. Il canone
-              rimane lo stesso, cambia solo il piano che scegli (base, app+chat,
-              WhatsApp, Instagram).
+              rimane lo stesso, cambia solo il piano che scegli (base,
+              app+chat, WhatsApp, Instagram).
             </p>
 
             <div
@@ -424,17 +430,17 @@ export default function IscrivitiPage() {
                   marginBottom: 8,
                 }}
               >
-                Bot base per rispondere alle domande dei clienti (orari,
-                servizi, indirizzo, domande frequenti) senza gestione diretta
-                delle prenotazioni. Ideale se vuoi partire in modo semplice.
+                Bot che risponde 24/7 alle domande frequenti dei clienti
+                (orari, servizi, indirizzo, contatti) senza gestire
+                prenotazioni o ordini. Ideale se vuoi iniziare a usare GalaxBot
+                AI per filtrare le richieste e liberare tempo, ma preferisci
+                continuare a gestire appuntamenti e ordini come fai adesso.
               </p>
 
               <a
                 href={STRIPE_BASE_URL}
-                target={STRIPE_BASE_URL === "#" ? undefined : "_blank"}
-                rel={
-                  STRIPE_BASE_URL === "#" ? undefined : "noreferrer"
-                }
+                target="_blank"
+                rel="noreferrer"
                 style={{
                   display: "inline-flex",
                   justifyContent: "center",
@@ -452,33 +458,18 @@ export default function IscrivitiPage() {
                   background:
                     "radial-gradient(circle at 0 0, #facc15, #eab308)",
                   color: "#111827",
-                  boxShadow:
-                    "0 18px 40px rgba(202,138,4,0.55)",
+                  boxShadow: "0 18px 40px rgba(202,138,4,0.55)",
                   marginTop: 4,
                 }}
               >
                 Attiva il Piano Base
               </a>
-
-              <p
-                style={{
-                  marginTop: 6,
-                  fontSize: 11,
-                  lineHeight: 1.4,
-                  color: "#92400e",
-                }}
-              >
-                Quando avrai i link Stripe definitivi per questo piano, basta
-                sostituire il link qui sopra: il testo dei prezzi sul sito non
-                cambia automaticamente da Stripe.
-              </p>
             </div>
 
             {/* PIANO APP + CHAT */}
             <div
               style={{
-                background:
-                  "linear-gradient(180deg,#fed7aa,#fdba74)",
+                background: "linear-gradient(180deg,#fed7aa,#fdba74)",
                 borderRadius: 24,
                 padding: 16,
                 boxShadow:
@@ -543,8 +534,7 @@ export default function IscrivitiPage() {
                   background:
                     "radial-gradient(circle at 0 0, #f97316, #ea580c)",
                   color: "#111827",
-                  boxShadow:
-                    "0 18px 40px rgba(194,65,12,0.55)",
+                  boxShadow: "0 18px 40px rgba(194,65,12,0.55)",
                 }}
               >
                 Attiva il Piano App + Chat
@@ -554,8 +544,7 @@ export default function IscrivitiPage() {
             {/* PIANO WHATSAPP */}
             <div
               style={{
-                background:
-                  "linear-gradient(180deg,#dcfce7,#bbf7d0)",
+                background: "linear-gradient(180deg,#dcfce7,#bbf7d0)",
                 borderRadius: 24,
                 padding: 16,
                 boxShadow:
@@ -571,7 +560,7 @@ export default function IscrivitiPage() {
                 }}
               >
                 Piano WhatsApp Business{" "}
-                <span style={{ float: "right" }}>39€/mese</span>
+                <span style={{ float: "right" }}>69€/mese</span>
               </h2>
               <p
                 style={{
@@ -581,29 +570,17 @@ export default function IscrivitiPage() {
                   marginBottom: 8,
                 }}
               >
-                Come il Piano App + Chat, ma collegato anche a{" "}
-                <strong>WhatsApp Business</strong>: il bot risponde ai messaggi,
-                raccoglie richieste e prenotazioni e scrive tutto sul foglio
-                Google.
-              </p>
-              <p
-                style={{
-                  fontSize: 12,
-                  lineHeight: 1.5,
-                  color: "#14532d",
-                  marginBottom: 10,
-                }}
-              >
-                Ideale se i tuoi clienti scrivono quasi sempre su WhatsApp per
-                chiedere informazioni o prenotare.
+                Bot collegato a WhatsApp Business che risponde ai messaggi dei
+                clienti 24/7, raccoglie richieste e prenotazioni e le salva in
+                automatico su un foglio Google dedicato. Nel foglio vedi tutte
+                le richieste in ordine di giorno e orario, così puoi richiamare
+                o confermare gli appuntamenti quando vuoi.
               </p>
 
               <a
                 href={STRIPE_WHATSAPP_URL}
-                target={STRIPE_WHATSAPP_URL === "#" ? undefined : "_blank"}
-                rel={
-                  STRIPE_WHATSAPP_URL === "#" ? undefined : "noreferrer"
-                }
+                target="_blank"
+                rel="noreferrer"
                 style={{
                   display: "inline-flex",
                   justifyContent: "center",
@@ -621,8 +598,7 @@ export default function IscrivitiPage() {
                   background:
                     "radial-gradient(circle at 0 0, #22c55e, #16a34a)",
                   color: "#022c22",
-                  boxShadow:
-                    "0 18px 40px rgba(22,163,74,0.55)",
+                  boxShadow: "0 18px 40px rgba(22,163,74,0.55)",
                 }}
               >
                 Attiva il Piano WhatsApp Business
@@ -632,8 +608,7 @@ export default function IscrivitiPage() {
             {/* PIANO INSTAGRAM */}
             <div
               style={{
-                background:
-                  "linear-gradient(180deg,#ffe4f3,#fbcfe8)",
+                background: "linear-gradient(180deg,#ffe4f3,#fbcfe8)",
                 borderRadius: 24,
                 padding: 16,
                 boxShadow:
@@ -649,7 +624,7 @@ export default function IscrivitiPage() {
                 }}
               >
                 Piano Instagram Direct{" "}
-                <span style={{ float: "right" }}>39€/mese</span>
+                <span style={{ float: "right" }}>69€/mese</span>
               </h2>
               <p
                 style={{
@@ -659,29 +634,18 @@ export default function IscrivitiPage() {
                   marginBottom: 8,
                 }}
               >
-                Come il Piano App + Chat, ma collegato ai{" "}
-                <strong>messaggi Direct di Instagram</strong>: il bot risponde
-                alle domande, raccoglie contatti e prenotazioni e scrive tutto
-                nel foglio Google.
-              </p>
-              <p
-                style={{
-                  fontSize: 12,
-                  lineHeight: 1.5,
-                  color: "#831843",
-                  marginBottom: 10,
-                }}
-              >
-                Ideale per profili Instagram attivi che ricevono molti messaggi
-                in DM e vogliono automatizzare le risposte.
+                Bot collegato ai messaggi Direct di Instagram che risponde alle
+                domande dei clienti, raccoglie contatti e richieste di
+                prenotazione e le salva in automatico su un foglio Google
+                dedicato. Nel foglio trovi tutte le richieste in ordine di
+                giorno e orario, così puoi gestire facilmente appuntamenti e
+                messaggi ricevuti da Instagram.
               </p>
 
               <a
                 href={STRIPE_INSTAGRAM_URL}
-                target={STRIPE_INSTAGRAM_URL === "#" ? undefined : "_blank"}
-                rel={
-                  STRIPE_INSTAGRAM_URL === "#" ? undefined : "noreferrer"
-                }
+                target="_blank"
+                rel="noreferrer"
                 style={{
                   display: "inline-flex",
                   justifyContent: "center",
@@ -699,8 +663,7 @@ export default function IscrivitiPage() {
                   background:
                     "radial-gradient(circle at 0 0, #ec4899, #db2777)",
                   color: "#fdf2f8",
-                  boxShadow:
-                    "0 18px 40px rgba(219,39,119,0.55)",
+                  boxShadow: "0 18px 40px rgba(219,39,119,0.55)",
                 }}
               >
                 Attiva il Piano Instagram Direct
