@@ -11,18 +11,18 @@ export const metadata = {
 const FORM_URL =
   "https://docs.google.com/forms/d/e/1FAIpQLSdovcqFp8fcpmeq5ukeY7Qw4u4Xy7IGzzaYyyHmHQduJCj5Ew/viewform?embedded=true";
 
+// ✅ LINK STRIPE GIUSTI
+const STRIPE_BASE_URL =
+  "https://buy.stripe.com/4gM3cvfafavSg3pf0Gb3q03"; // Piano Base – Solo bot info
+const STRIPE_APP_CHAT_URL =
+  "https://buy.stripe.com/9B6aEX9PV9rO6sPcSyb3q06"; // Piano App + Chat
+const STRIPE_WHATSAPP_URL =
+  "https://buy.stripe.com/fZu4gz5zF47u7wT5q6b3q04"; // Piano WhatsApp Business
+const STRIPE_INSTAGRAM_URL =
+  "https://buy.stripe.com/cNi3cve6b33q8AX6uab3q05"; // Piano Instagram Direct
+
 const recensioniUrl =
   "https://docs.google.com/forms/d/e/1FAIpQLSdKA4gx4djL3YUH1rNXjHIqP_MpjSX-m_0jXC8vMRxIWR4sWw/viewform";
-
-// 🔗 Link Stripe per i 4 piani
-const STRIPE_APP_CHAT =
-  "https://buy.stripe.com/4gM3cvfafavSg3pf0Gb3q03"; // Piano App + Chat
-const STRIPE_BASE =
-  "https://buy.stripe.com/fZu4gz5zF47u7wT5q6b3q04"; // Piano Base
-const STRIPE_WHATSAPP =
-  "https://buy.stripe.com/cNi3cve6b33q8AX6uab3q05"; // Piano WhatsApp Business
-const STRIPE_INSTAGRAM =
-  "https://buy.stripe.com/9B6aEX9PV9rO6sPcSyb3q06"; // Piano Instagram Direct
 
 const demoSettori: { label: string; href: string }[] = [
   { label: "Barbiere / Parrucchiere", href: "/demos/barbiere" },
@@ -111,7 +111,7 @@ export default function IscrivitiPage() {
           }}
         >
           Da questa pagina fai tutto: ci dai i dati del tuo negozio, guardi un
-          demo del tuo settore e attivi l&apos;abbonamento mensile.
+          demo del tuo settore e scegli il piano di abbonamento.
           <br />
           Noi configuriamo il chatbot su WhatsApp, Instagram, sito{" "}
           <strong>oppure solo come app dedicata (link + QR code)</strong> e ti
@@ -169,7 +169,7 @@ export default function IscrivitiPage() {
           />
         </div>
 
-        {/* LAYOUT 3 SEZIONI - RESPONSIVE */}
+        {/* LAYOUT 3 COLONNE */}
         <div
           style={{
             display: "flex",
@@ -250,9 +250,9 @@ export default function IscrivitiPage() {
               <strong>consenso ai cookie di Moduli Google</strong>, accetta per
               poter compilare il modulo direttamente da questa pagina.
               <br />
-              Dopo l&apos;invio ti contattiamo via email o WhatsApp per
-              confermare i dettagli e mostrarti una demo personalizzata del tuo
-              bot.
+              Dopo l&apos;invio del modulo ti contattiamo via email o WhatsApp
+              per confermare i dettagli e mostrarti una demo personalizzata del
+              tuo bot.
             </p>
           </section>
 
@@ -267,6 +267,8 @@ export default function IscrivitiPage() {
               padding: 18,
               boxShadow:
                 "0 18px 45px rgba(15,23,42,0.08), 0 0 0 1px rgba(148,163,184,0.16)",
+              display: "flex",
+              flexDirection: "column",
             }}
           >
             <h2
@@ -289,7 +291,7 @@ export default function IscrivitiPage() {
             >
               Apri il demo più vicino alla tua attività per vedere come GalaxBot
               AI potrebbe lavorare per te. Le pagine demo mostrano esempi di
-              messaggi e flussi: la chat in tempo reale è attiva come esempio
+              messaggi e flussi; la chat in tempo reale è attiva come esempio
               completo sul demo barbiere.
             </p>
 
@@ -332,18 +334,15 @@ export default function IscrivitiPage() {
                 fontSize: 12,
                 color: "#6b7280",
                 lineHeight: 1.5,
+                marginBottom: 10,
               }}
             >
               Non trovi il tuo settore? Nel modulo puoi descrivere il tuo caso:
-              adatteremo il bot ai tuoi servizi e alle tue regole.
+              adatteremo il bot ai tuoi servizi e alle tue regole. Il canone
+              rimane lo stesso.
             </p>
 
-            {/* CTA mobile: vedi il demo */}
-            <div
-              style={{
-                marginTop: 12,
-              }}
-            >
+            <div style={{ marginTop: "auto" }}>
               <a
                 href="/demos/barbiere"
                 style={{
@@ -359,8 +358,7 @@ export default function IscrivitiPage() {
                   background:
                     "linear-gradient(135deg, #020617, #0f172a)",
                   color: "#f9fafb",
-                  boxShadow:
-                    "0 16px 32px rgba(15,23,42,0.55)",
+                  boxShadow: "0 16px 32px rgba(15,23,42,0.55)",
                 }}
               >
                 👀 Prova la chat demo (barbiere)
@@ -380,137 +378,379 @@ export default function IscrivitiPage() {
             </div>
           </section>
 
-          {/* COLONNA 3: PIANI */}
+          {/* COLONNA 3: ABBONAMENTI */}
           <section
             style={{
-              flex: "1 1 300px",
+              flex: "1 1 320px",
               minWidth: 0,
               display: "flex",
               flexDirection: "column",
               gap: 14,
             }}
           >
-            <h2
+            {/* PIANO BASE */}
+            <div
               style={{
-                fontSize: 17,
-                fontWeight: 700,
-                marginBottom: 2,
-                color: "#0f172a",
+                background:
+                  "linear-gradient(180deg, #fef9c3, #fffbeb)",
+                borderRadius: 24,
+                padding: 18,
+                boxShadow:
+                  "0 18px 45px rgba(180,83,9,0.18), 0 0 0 1px rgba(252,211,77,0.8)",
               }}
             >
-              3. Scegli il piano GalaxBot AI
-            </h2>
-            <p
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  marginBottom: 6,
+                }}
+              >
+                <h2
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 800,
+                    color: "#78350f",
+                  }}
+                >
+                  Piano Base · Solo bot informazioni
+                </h2>
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: "#92400e",
+                  }}
+                >
+                  19€/mese
+                </span>
+              </div>
+
+              <p
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                  color: "#92400e",
+                  marginBottom: 10,
+                }}
+              >
+                Bot che risponde 24/7 alle domande frequenti dei clienti (orari,
+                servizi, indirizzo, contatti) senza gestire prenotazioni o
+                ordini. Ideale se vuoi iniziare a usare GalaxBot AI per filtrare
+                le richieste e liberare tempo, ma preferisci continuare a
+                gestire appuntamenti e ordini come fai adesso.
+              </p>
+
+              <a
+                href={STRIPE_BASE_URL}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: "inline-flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%",
+                  padding: "11px 14px",
+                  borderRadius: 999,
+                  border: "none",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: 0.2,
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  textDecoration: "none",
+                  background:
+                    "radial-gradient(circle at 0 0, #facc15, #eab308)",
+                  color: "#111827",
+                  boxShadow:
+                    "0 18px 40px rgba(202,138,4,0.55)",
+                }}
+              >
+                Attiva il Piano Base
+              </a>
+            </div>
+
+            {/* PIANO APP + CHAT */}
+            <div
               style={{
-                fontSize: 12,
-                color: "#4b5563",
-                marginBottom: 4,
+                background:
+                  "linear-gradient(180deg, #fed7aa, #ffedd5)",
+                borderRadius: 24,
+                padding: 18,
+                boxShadow:
+                  "0 18px 45px rgba(194,65,12,0.25), 0 0 0 1px rgba(248,171,104,0.9)",
               }}
             >
-              Scegli come vuoi usare il bot: solo per info, con chat +
-              prenotazioni dal sito/app, oppure collegato anche a WhatsApp
-              Business o ai DM di Instagram.
-            </p>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  marginBottom: 6,
+                }}
+              >
+                <h2
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 800,
+                    color: "#7c2d12",
+                  }}
+                >
+                  Piano App + Chat · Prenotazioni
+                </h2>
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: "#9a3412",
+                  }}
+                >
+                  29€/mese
+                </span>
+              </div>
 
-            {/* Piano Base */}
-            <PriceCard
-              title="Piano Base · Solo bot informazioni"
-              price="19€/mese"
-              description={
-                <>
-                  Bot che risponde 24/7 alle domande frequenti dei clienti
-                  (orari, servizi, indirizzo, contatti) senza gestire
-                  prenotazioni o ordini. Ideale se vuoi iniziare a usare
-                  GalaxBot AI per filtrare le richieste e liberare tempo, ma
-                  preferisci continuare a gestire appuntamenti e ordini come fai
-                  adesso.
-                </>
-              }
-              buttonLabel="Attiva il Piano Base"
-              href={STRIPE_BASE}
-              gradient="linear-gradient(180deg,#fef9c3,#fde68a)"
-              buttonBg="linear-gradient(135deg,#facc15,#eab308)"
-              buttonTextColor="#1f2937"
-            />
+              <p
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                  color: "#9a3412",
+                  marginBottom: 8,
+                }}
+              >
+                Include app / pagina dedicata con chat, modulo prenotazioni
+                collegato al foglio Google e demo personalizzata per il tuo
+                settore (barbiere, pizzeria, estetica, studio medico, ecc.).
+              </p>
 
-            {/* Piano App + Chat */}
-            <PriceCard
-              title="Piano App + Chat · Prenotazioni"
-              price="29€/mese"
-              description={
-                <>
-                  Include app / pagina dedicata con chat, modulo prenotazioni
-                  collegato al foglio Google e demo personalizzata per il tuo
-                  settore (barbiere, pizzeria, estetica, studio medico, ecc.).
-                  <br />
-                  <br />
-                  <strong
-                    style={{
-                      display: "inline-block",
-                      padding: "6px 10px",
-                      borderRadius: 999,
-                      background:
-                        "linear-gradient(90deg,#f97316,#facc15)",
-                      color: "#1f2937",
-                      fontSize: 11,
-                    }}
-                  >
-                    PROMO LANCIO: usa il codice PROMO10 al checkout Stripe e
-                    paghi solo 10€ il primo mese, poi 29€/mese.
-                  </strong>
-                </>
-              }
-              buttonLabel="Attiva il Piano App + Chat"
-              href={STRIPE_APP_CHAT}
-              gradient="linear-gradient(180deg,#ffedd5,#fdba74)"
-              buttonBg="linear-gradient(135deg,#ea580c,#c2410c)"
-              buttonTextColor="#f9fafb"
-            />
+              <div
+                style={{
+                  fontSize: 12,
+                  lineHeight: 1.5,
+                  background:
+                    "linear-gradient(135deg, #f97316, #facc15)",
+                  color: "#1f2937",
+                  padding: "8px 10px",
+                  borderRadius: 14,
+                  fontWeight: 600,
+                  marginBottom: 10,
+                  boxShadow:
+                    "0 12px 28px rgba(194,65,12,0.45)",
+                  textAlign: "center",
+                }}
+              >
+                <span
+                  style={{
+                    display: "block",
+                    fontWeight: 800,
+                    letterSpacing: 0.4,
+                    textTransform: "uppercase",
+                    marginBottom: 2,
+                  }}
+                >
+                  Promo lancio
+                </span>
+                Usa il codice{" "}
+                <span style={{ fontWeight: 800 }}>PROMO10</span> al checkout
+                Stripe e paghi{" "}
+                <strong>solo 10€ il primo mese</strong>, poi 29€/mese.
+              </div>
 
-            {/* Piano WhatsApp */}
-            <PriceCard
-              title="Piano WhatsApp Business"
-              price="69€/mese"
-              description={
-                <>
-                  Come il Piano App + Chat, ma collegato anche a{" "}
-                  <strong>WhatsApp Business</strong>: il bot risponde ai
-                  messaggi dei clienti 24/7, raccoglie richieste e prenotazioni
-                  e le salva in automatico su un foglio Google dedicato.
-                  <br />
-                  Nel foglio vedi tutte le richieste in ordine di giorno e
-                  orario, così puoi richiamare o confermare gli appuntamenti
-                  quando vuoi.
-                </>
-              }
-              buttonLabel="Attiva il Piano WhatsApp Business"
-              href={STRIPE_WHATSAPP}
-              gradient="linear-gradient(180deg,#dcfce7,#bbf7d0)"
-              buttonBg="linear-gradient(135deg,#16a34a,#15803d)"
-              buttonTextColor="#052e16"
-            />
+              <a
+                href={STRIPE_APP_CHAT_URL}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: "inline-flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%",
+                  padding: "11px 14px",
+                  borderRadius: 999,
+                  border: "none",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: 0.2,
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  textDecoration: "none",
+                  background:
+                    "radial-gradient(circle at 0 0, #ea580c, #b91c1c)",
+                  color: "#fef2f2",
+                  boxShadow:
+                    "0 18px 40px rgba(185,28,28,0.65)",
+                }}
+              >
+                Attiva il Piano App + Chat
+              </a>
+            </div>
 
-            {/* Piano Instagram */}
-            <PriceCard
-              title="Piano Instagram Direct"
-              price="69€/mese"
-              description={
-                <>
-                  Come il Piano App + Chat, ma collegato ai{" "}
-                  <strong>messaggi Direct di Instagram</strong>: il bot risponde
-                  alle domande, raccoglie contatti e prenotazioni e scrive tutto
-                  nel foglio Google.
-                  <br />
-                  Ideale se il tuo profilo Instagram riceve molti DM e vuoi
-                  automatizzare risposte e richieste appuntamento.
-                </>
-              }
-              buttonLabel="Attiva il Piano Instagram Direct"
-              href={STRIPE_INSTAGRAM}
-              gradient="linear-gradient(180deg,#fce7f3,#f9a8d4)"
-              buttonBg="linear-gradient(135deg,#db2777,#c026d3)"
-              buttonTextColor="#fdf2f8"
-            />
+            {/* PIANO WHATSAPP */}
+            <div
+              style={{
+                background:
+                  "linear-gradient(180deg, #dcfce7, #bbf7d0)",
+                borderRadius: 24,
+                padding: 18,
+                boxShadow:
+                  "0 18px 45px rgba(22,163,74,0.25), 0 0 0 1px rgba(74,222,128,0.9)",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  marginBottom: 6,
+                }}
+              >
+                <h2
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 800,
+                    color: "#166534",
+                  }}
+                >
+                  Piano WhatsApp Business
+                </h2>
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: "#15803d",
+                  }}
+                >
+                  69€/mese
+                </span>
+              </div>
+
+              <p
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                  color: "#166534",
+                  marginBottom: 10,
+                }}
+              >
+                Bot collegato a{" "}
+                <strong>WhatsApp Business</strong> che risponde ai messaggi dei
+                clienti 24/7, raccoglie richieste e prenotazioni e le salva in
+                automatico su un foglio Google dedicato. Nel foglio vedi tutte
+                le richieste in ordine di giorno e orario, così puoi richiamare
+                o confermare gli appuntamenti quando vuoi.
+              </p>
+
+              <a
+                href={STRIPE_WHATSAPP_URL}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: "inline-flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%",
+                  padding: "11px 14px",
+                  borderRadius: 999,
+                  border: "none",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: 0.2,
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  textDecoration: "none",
+                  background:
+                    "radial-gradient(circle at 0 0, #22c55e, #15803d)",
+                  color: "#052e16",
+                  boxShadow:
+                    "0 18px 40px rgba(21,128,61,0.6)",
+                }}
+              >
+                Attiva il Piano WhatsApp Business
+              </a>
+            </div>
+
+            {/* PIANO INSTAGRAM */}
+            <div
+              style={{
+                background:
+                  "linear-gradient(180deg, #fee2e2, #ffe4f3)",
+                borderRadius: 24,
+                padding: 18,
+                boxShadow:
+                  "0 18px 45px rgba(219,39,119,0.3), 0 0 0 1px rgba(251,113,133,0.9)",
+            }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "baseline",
+                  marginBottom: 6,
+                }}
+              >
+                <h2
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 800,
+                    color: "#9d174d",
+                  }}
+                >
+                  Piano Instagram Direct
+                </h2>
+                <span
+                  style={{
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: "#be123c",
+                  }}
+                >
+                  69€/mese
+                </span>
+              </div>
+
+              <p
+                style={{
+                  fontSize: 13,
+                  lineHeight: 1.6,
+                  color: "#9d174d",
+                  marginBottom: 10,
+                }}
+              >
+                Bot collegato ai{" "}
+                <strong>messaggi Direct di Instagram</strong>: risponde alle
+                domande, raccoglie contatti e prenotazioni e scrive tutto nel
+                foglio Google collegato. Ideale se ricevi tanti DM e vuoi
+                automatizzare le risposte senza perdere richieste.
+              </p>
+
+              <a
+                href={STRIPE_INSTAGRAM_URL}
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  display: "inline-flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  width: "100%",
+                  padding: "11px 14px",
+                  borderRadius: 999,
+                  border: "none",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: 0.2,
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  textDecoration: "none",
+                  background:
+                    "radial-gradient(circle at 0 0, #db2777, #7e22ce)",
+                  color: "#fdf2f8",
+                  boxShadow:
+                    "0 18px 40px rgba(126,34,206,0.6)",
+                }}
+              >
+                Attiva il Piano Instagram Direct
+              </a>
+            </div>
           </section>
         </div>
       </div>
@@ -537,8 +777,7 @@ function StepPill({ step, title, subtitle }: StepProps) {
         background:
           "linear-gradient(135deg, #020617, #0f172a)",
         borderRadius: 999,
-        boxShadow:
-          "0 16px 30px rgba(15,23,42,0.55)",
+        boxShadow: "0 16px 30px rgba(15,23,42,0.55)",
         color: "white",
         minWidth: 0,
       }}
@@ -591,95 +830,27 @@ function StepPill({ step, title, subtitle }: StepProps) {
   );
 }
 
-function PriceCard(props: {
-  title: string;
-  price: string;
-  description: React.ReactNode;
-  buttonLabel: string;
-  href: string;
-  gradient: string;
-  buttonBg: string;
-  buttonTextColor: string;
-}) {
-  const { title, price, description, buttonLabel, href, gradient, buttonBg, buttonTextColor } =
-    props;
-
+function LiPoint({ children }: { children: React.ReactNode }) {
   return (
-    <div
+    <li
       style={{
-        borderRadius: 24,
-        padding: 18,
-        background: gradient,
-        boxShadow:
-          "0 18px 45px rgba(15,23,42,0.16), 0 0 0 1px rgba(148,163,184,0.4)",
+        display: "flex",
+        alignItems: "flex-start",
+        gap: 8,
       }}
     >
-      <div
+      <span
         style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "baseline",
-          gap: 8,
-          marginBottom: 6,
+          marginTop: 4,
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle at 30% 0, #38bdf8, #0ea5e9)",
+          flexShrink: 0,
         }}
-      >
-        <h3
-          style={{
-            fontSize: 15,
-            fontWeight: 800,
-            color: "#1f2937",
-          }}
-        >
-          {title}
-        </h3>
-        <span
-          style={{
-            fontSize: 14,
-            fontWeight: 800,
-            color: "#1f2937",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {price}
-        </span>
-      </div>
-
-      <p
-        style={{
-          fontSize: 12,
-          lineHeight: 1.7,
-          color: "#374151",
-          marginBottom: 10,
-        }}
-      >
-        {description}
-      </p>
-
-      <a
-        href={href}
-        target="_blank"
-        rel="noreferrer"
-        style={{
-          display: "inline-flex",
-          justifyContent: "center",
-          alignItems: "center",
-          width: "100%",
-          padding: "10px 14px",
-          borderRadius: 999,
-          border: "none",
-          fontSize: 13,
-          fontWeight: 700,
-          letterSpacing: 0.2,
-          textTransform: "uppercase",
-          cursor: "pointer",
-          textDecoration: "none",
-          background: buttonBg,
-          color: buttonTextColor,
-          boxShadow: "0 18px 40px rgba(15,23,42,0.35)",
-        }}
-      >
-        {buttonLabel}
-      </a>
-    </div>
+      />
+      <span>{children}</span>
+    </li>
   );
 }
