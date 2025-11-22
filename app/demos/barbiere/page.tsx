@@ -1,28 +1,14 @@
 // app/demos/barbiere/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
 import ChatBox from "../../components/chatbox";
 
 export default function BarbiereDemoPage() {
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Controllo larghezza finestra per layout responsive
-  useEffect(() => {
-    function handleResize() {
-      setIsMobile(window.innerWidth < 900);
-    }
-
-    handleResize(); // chiamata iniziale
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
-
   return (
     <main
       style={{
         minHeight: "100vh",
-        padding: "32px 12px 56px",
+        padding: "40px 16px 60px",
         background:
           "radial-gradient(circle at top, rgba(56,189,248,0.25), transparent 50%), radial-gradient(circle at bottom, rgba(147,51,234,0.35), #020617 70%)",
         color: "#e5e7eb",
@@ -44,44 +30,17 @@ export default function BarbiereDemoPage() {
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            marginBottom: 24,
+            marginBottom: 32,
             gap: 16,
             flexWrap: "wrap",
           }}
         >
           <div>
-            <div
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "4px 10px",
-                borderRadius: 999,
-                background: "rgba(15,23,42,0.85)",
-                border: "1px solid rgba(148,163,184,0.7)",
-                fontSize: 11,
-                letterSpacing: 1,
-                textTransform: "uppercase",
-                marginBottom: 8,
-              }}
-            >
-              <span
-                style={{
-                  width: 7,
-                  height: 7,
-                  borderRadius: "50%",
-                  background:
-                    "radial-gradient(circle at 30% 0, #22c55e, #16a34a)",
-                }}
-              />
-              <span>Demo bot avanzato per barber shop</span>
-            </div>
-
             <h1
               style={{
                 fontSize: "2rem",
-                fontWeight: 800,
-                marginBottom: 6,
+                fontWeight: 700,
+                marginBottom: 4,
               }}
             >
               Prenotazioni Barbiere BOT AVANZATO 💈
@@ -89,15 +48,15 @@ export default function BarbiereDemoPage() {
             <p
               style={{
                 fontSize: "0.95rem",
-                opacity: 0.86,
-                maxWidth: 620,
+                opacity: 0.8,
+                maxWidth: 640,
               }}
             >
               Prova il chatbot in tempo reale. Puoi fare domande sui servizi
               oppure prenotare direttamente con il box{" "}
-              <strong>“Prenotazione veloce dal bot”</strong>. Le prenotazioni
-              di prova finiscono in un foglio Google, come succederebbe per il
-              barbiere reale.
+              <strong>“Prenotazione veloce dal bot”</strong> sotto la chat.
+              Le prenotazioni di prova finiscono in un foglio Google, come
+              succederebbe per il barbiere reale.
             </p>
           </div>
 
@@ -120,14 +79,14 @@ export default function BarbiereDemoPage() {
           </div>
         </header>
 
-        {/* SEZIONE ISTRUZIONI */}
+        {/* BANNER ISTRUZIONI */}
         <section
           style={{
             marginBottom: 20,
             padding: "10px 14px",
             borderRadius: 16,
-            background: "rgba(15,23,42,0.95)",
-            border: "1px solid rgba(148,163,184,0.6)",
+            background: "rgba(15,23,42,0.9)",
+            border: "1px solid rgba(148,163,184,0.5)",
             fontSize: "0.85rem",
             display: "flex",
             flexDirection: "column",
@@ -146,39 +105,37 @@ export default function BarbiereDemoPage() {
             }}
           >
             <li>
-              Fai una domanda al bot nella{" "}
-              <strong>chat in alto nella card</strong> (orari, servizi, prezzi).
+              Fai una domanda al bot nella chat in alto (orari, servizi,
+              prezzi).
             </li>
             <li>
-              Per registrare una <strong>prenotazione di prova</strong> usa il
-              box <strong>“Prenotazione veloce dal bot”</strong> sotto la chat.
+              Per registrare una{" "}
+              <strong>prenotazione di prova</strong> usa il box{" "}
+              <strong>“Prenotazione veloce dal bot”</strong> sotto la chat.
             </li>
             <li>
-              Se scegli una <strong>data passata</strong> o un{" "}
-              <strong>orario già occupato</strong>, il sistema ti avvisa e non
-              salva la prenotazione.
+              Se scegli una data passata o un orario già occupato, il sistema
+              ti avvisa e non salva la prenotazione.
             </li>
           </ul>
         </section>
 
-        {/* LAYOUT CHAT + SPIEGAZIONE */}
+        {/* CARD PRINCIPALE: CHAT + MODULO + INFO */}
         <section
           style={{
             display: "grid",
-            gridTemplateColumns: isMobile
-              ? "minmax(0,1fr)"
-              : "minmax(0,1.5fr) minmax(0,1fr)",
-            gap: isMobile ? 16 : 20,
+            gridTemplateColumns: "minmax(0,1.5fr) minmax(0,1fr)",
+            gap: 20,
             alignItems: "flex-start",
           }}
         >
           {/* COLONNA SINISTRA: CHAT + PRENOTAZIONE */}
           <div
             style={{
-              background: "rgba(15,23,42,0.96)",
+              background: "rgba(15,23,42,0.95)",
               borderRadius: 24,
               padding: 16,
-              border: "1px solid rgba(148,163,184,0.7)",
+              border: "1px solid rgba(148,163,184,0.6)",
               boxShadow: "0 18px 50px rgba(15,23,42,0.9)",
             }}
           >
@@ -189,7 +146,6 @@ export default function BarbiereDemoPage() {
                 justifyContent: "space-between",
                 alignItems: "center",
                 gap: 8,
-                flexWrap: "wrap",
               }}
             >
               <div>
@@ -207,28 +163,28 @@ export default function BarbiereDemoPage() {
                     opacity: 0.8,
                   }}
                 >
-                  Esempi: “Posso prenotare un taglio domani?”, “Avete posto
-                  sabato pomeriggio?”, “Quanto costa taglio + barba?”.
+                  Esempi di domande: “Posso prenotare un taglio domani?”,
+                  “Avete posto sabato pomeriggio?”, “Quanto costa taglio +
+                  barba?”.
                 </div>
               </div>
             </div>
 
-            {/* CHAT + PRENOTAZIONE VELOCE */}
+            {/* Qui dentro c’è sia CHAT che PRENOTAZIONE VELOCE */}
             <ChatBox />
           </div>
 
-          {/* COLONNA DESTRA: SPIEGAZIONE + CTA */}
+          {/* COLONNA DESTRA: RIASSUNTO VANTAGGI + CTA */}
           <aside
             style={{
-              background: "rgba(15,23,42,0.97)",
+              background: "rgba(15,23,42,0.95)",
               borderRadius: 24,
               padding: 16,
-              border: "1px solid rgba(148,163,184,0.6)",
+              border: "1px solid rgba(148,163,184,0.5)",
               display: "flex",
               flexDirection: "column",
               gap: 14,
-              fontSize: "0.86rem",
-              marginTop: isMobile ? 4 : 0,
+              fontSize: "0.85rem",
             }}
           >
             <h2
@@ -252,84 +208,111 @@ export default function BarbiereDemoPage() {
               }}
             >
               <li>
-                I clienti ti scrivono su{" "}
-                <strong>WhatsApp, Instagram o dal sito</strong> e il bot
-                risponde subito al posto tuo.
+                I clienti ti scrivono su WhatsApp, Instagram o dal sito e il
+                bot risponde subito al posto tuo.
               </li>
               <li>
-                Le richieste di appuntamento finiscono in un{" "}
-                <strong>foglio Google</strong> che puoi controllare quando vuoi.
+                Le richieste di appuntamento finiscono in un foglio Google che
+                puoi controllare quando vuoi.
               </li>
               <li>
-                Possiamo adattare questo sistema a{" "}
-                <strong>pizzerie, bar, pasticcerie, hotel, studi medici,
-                negozi di abbigliamento</strong> e altri settori.
+                Possiamo adattare questo sistema a pizzerie, bar, pasticcerie,
+                hotel, studi medici, negozi di abbigliamento e altri settori.
               </li>
             </ul>
 
+            {/* CARD VERDE: ISCRIZIONE + ABBONAMENTO */}
             <div
               style={{
                 marginTop: 8,
-                padding: "10px 12px",
-                borderRadius: 16,
+                padding: "10px 12px 12px",
+                borderRadius: 18,
                 background:
-                  "linear-gradient(135deg, rgba(34,197,94,0.18), rgba(59,130,246,0.18))",
-                border: "1px solid rgba(74,222,128,0.45)",
+                  "linear-gradient(135deg, rgba(34,197,94,0.18), rgba(59,130,246,0.16))",
+                border: "1px solid rgba(74,222,128,0.5)",
                 fontSize: "0.8rem",
                 lineHeight: 1.5,
               }}
             >
-              Compilando il modulo di iscrizione ti preparo una versione
-              personalizzata del bot per la tua attività. Se ti piace, puoi
-              attivare l’abbonamento e collegarlo a WhatsApp Business, sito o
-              solo come app con link + QR code.
-            </div>
+              <p
+                style={{
+                  margin: 0,
+                  marginBottom: 8,
+                }}
+              >
+                Compilando il{" "}
+                <strong>modulo di iscrizione</strong> ti preparo una versione
+                personalizzata del bot per la tua attività. Se ti piace, puoi
+                attivare l&apos;abbonamento e collegarlo a WhatsApp Business,
+                sito o solo come app con link + QR code.
+              </p>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 8,
-                marginTop: 4,
-              }}
-            >
-              <a
-                href="/iscriviti"
+              <p
                 style={{
-                  display: "inline-flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 9999,
-                  padding: "9px 14px",
-                  fontSize: "0.85rem",
-                  fontWeight: 600,
-                  textDecoration: "none",
-                  background:
-                    "linear-gradient(135deg, #22c55e, #16a34a)",
-                  color: "#052e16",
-                  boxShadow: "0 14px 30px rgba(34,197,94,0.5)",
+                  margin: 0,
+                  marginBottom: 8,
+                  opacity: 0.9,
                 }}
               >
-                Compila il modulo per il tuo bot
-              </a>
-              <a
-                href="/iscriviti#abbonamento"
+                Quando clicchi sul pulsante, vai alla pagina{" "}
+                <strong>Iscrizione GalaxBot AI</strong>. Da lì puoi aprire il{" "}
+                <strong>modulo ufficiale su Google</strong>, che si apre in
+                una nuova scheda: compili, invii e poi puoi semplicemente
+                chiudere la scheda per tornare al sito.
+              </p>
+
+              <div
                 style={{
-                  display: "inline-flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderRadius: 9999,
-                  padding: "8px 14px",
-                  fontSize: "0.8rem",
-                  fontWeight: 500,
-                  textDecoration: "none",
-                  border: "1px solid rgba(148,163,184,0.8)",
-                  background: "rgba(15,23,42,0.6)",
-                  color: "#e5e7eb",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 8,
+                  marginTop: 4,
                 }}
               >
-                Vedi prezzo e attiva l’abbonamento
-              </a>
+                {/* Bottone 1: va alla pagina /iscriviti */}
+                <a
+                  href="/iscriviti"
+                  style={{
+                    display: "inline-flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "9px 12px",
+                    borderRadius: 999,
+                    fontSize: "0.82rem",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    background:
+                      "linear-gradient(135deg, #22c55e, #16a34a)",
+                    color: "#022c22",
+                    boxShadow: "0 12px 30px rgba(22,163,74,0.55)",
+                  }}
+                >
+                  Compila il modulo per il tuo bot
+                </a>
+
+                {/* Bottone 2: va direttamente al checkout Stripe */}
+                <a
+                  href="https://buy.stripe.com/5kQ4gzbY30Vi6sP6uab3q02"
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: "inline-flex",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    padding: "9px 12px",
+                    borderRadius: 999,
+                    fontSize: "0.8rem",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    background:
+                      "linear-gradient(135deg, #facc15, #f97316)",
+                    color: "#1f2937",
+                    boxShadow: "0 10px 24px rgba(245,158,11,0.55)",
+                  }}
+                >
+                  Vedi prezzo e attiva l&apos;abbonamento
+                </a>
+              </div>
             </div>
           </aside>
         </section>
@@ -337,14 +320,14 @@ export default function BarbiereDemoPage() {
         {/* FOOTER DEMO */}
         <footer
           style={{
-            marginTop: 30,
+            marginTop: 32,
             fontSize: "0.75rem",
-            opacity: 0.6,
+            opacity: 0.55,
             textAlign: "center",
           }}
         >
-          Questa è solo una demo. Nel progetto reale colleghiamo GalaxBot AI al
-          tuo WhatsApp Business, Instagram o sito web e lo adattiamo al tuo
+          Questo è solo un esempio. Nel progetto reale colleghiamo GalaxBot AI
+          al tuo WhatsApp Business, Instagram o sito web e lo adattiamo al tuo
           settore (barbiere, pizzeria, bar, studio medico, negozio, ecc.),
           gestendo per te messaggi, appuntamenti e prenotazioni.
         </footer>
