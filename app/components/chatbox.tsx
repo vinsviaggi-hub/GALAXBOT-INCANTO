@@ -302,8 +302,8 @@ export default function ChatBox() {
           }}
         >
           Compila questi campi e il sistema salva la prenotazione direttamente
-          nel pannello del barbiere.  
-          I messaggi scritti nella chat **non** creano prenotazioni.
+          nel pannello del barbiere. I messaggi scritti nella chat **non**
+          creano prenotazioni.
         </p>
 
         <form
@@ -314,7 +314,14 @@ export default function ChatBox() {
             fontSize: "0.8rem",
           }}
         >
-          <div style={{ display: "flex", gap: 6 }}>
+          {/* Nome / Telefono uno sotto l'altro (mobile friendly) */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+            }}
+          >
             <input
               style={fieldStyle}
               placeholder="Nome"
@@ -343,7 +350,14 @@ export default function ChatBox() {
             }
           />
 
-          <div style={{ display: "flex", gap: 6 }}>
+          {/* Data / Ora uno sotto l'altro (mobile friendly) */}
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 6,
+            }}
+          >
             <input
               style={fieldStyle}
               type="date"
