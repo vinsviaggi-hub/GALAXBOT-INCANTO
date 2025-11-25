@@ -1,23 +1,31 @@
+// app/api/availability/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
+// stessa URL che usi in /api/bookings
 const SCRIPT_URL =
   "https://script.google.com/macros/s/AKfycbz0W7HTl3FYsaY0q7di83Ujx1boiqNM577DasWSmGm711tRoZ86hTYaczMeQuMNUKg/exec";
 
+type AvailabilityBody = {
+  date?: string; // "YYYY-MM-DD"
+};
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json().catch(() => null);
-    const date = (body?.date || "").trim();
+    const body = (await req.json().catch(() => null)) as AvailabilityBody | null;
 
-    if (!date) {
+    if (!body || !body.date) {
       return NextResponse.json(
-        { success: false, error: "Data mancante." },
+        {
+          success: false,
+          error: "Data mancante per availability.",
+        },
         { status: 400 }
       );
     }
 
     const payload = {
-      action: "get_booked_times",
-      date,
+      action: "get_availability",
+      date: String(body.date).trim(),
     };
 
     const gsRes = await fetch(SCRIPT_URL, {
@@ -31,36 +39,39 @@ export async function POST(req: NextRequest) {
 
     try {
       data = JSON.parse(text);
-    } catch {
+    } catch (err) {
       console.error("Risposta NON JSON da Apps Script (availability):", text);
       return NextResponse.json(
         {
           success: false,
-          error: "Errore nel collegamento al foglio prenotazioni.",
+          error:
+            "Errore nel collegamento al foglio prenotazioni (availability).",
         },
         { status: 502 }
       );
     }
 
     if (!gsRes.ok || !data.success) {
+      const errorMessage: string =
+        data?.error ||
+        data?.message ||
+        "Non è stato possibile leggere la disponibilità.";
+
       return NextResponse.json(
         {
           success: false,
-          error:
-            data?.error ||
-            data?.message ||
-            "Non è stato possibile leggere gli orari disponibili.",
+          error: errorMessage,
         },
         { status: 400 }
       );
     }
 
+    // OK: ritorno solo gli slot liberi
     return NextResponse.json(
       {
         success: true,
-        bookedTimes: Array.isArray(data.bookedTimes)
-          ? data.bookedTimes
-          : [],
+        date: data.date,
+        freeSlots: Array.isArray(data.freeSlots) ? data.freeSlots : [],
       },
       { status: 200 }
     );
@@ -69,7 +80,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       {
         success: false,
-        error: "Errore interno del server.",
+        error: "Errore interno del server availability.",
       },
       { status: 500 }
     );

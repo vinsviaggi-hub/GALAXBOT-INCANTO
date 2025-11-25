@@ -1,22 +1,31 @@
+// app/demos/barbiere/page.tsx
 "use client";
 
-import { useState, FormEvent, type CSSProperties } from "react";
+import {
+  useState,
+  FormEvent,
+  type CSSProperties,
+  type ChangeEvent,
+} from "react";
 import ChatBox from "@/app/components/chatbox";
 
-const TIME_SLOTS: string[] = [
-  "08:00",
-  "09:00",
-  "10:00",
-  "11:00",
-  "12:00",
-  "13:00",
-  "14:00",
-  "15:00",
-  "16:00",
-  "17:00",
-  "18:00",
+// Orari demo dalle 08:00 alle 19:00 ogni 30 minuti (fallback se availability non funziona)
+const FALLBACK_SLOTS = [
+  "08:00", "08:30",
+  "09:00", "09:30",
+  "10:00", "10:30",
+  "11:00", "11:30",
+  "12:00", "12:30",
+  "13:00", "13:30",
+  "14:00", "14:30",
+  "15:00", "15:30",
+  "16:00", "16:30",
+  "17:00", "17:30",
+  "18:00", "18:30",
   "19:00",
 ];
+
+type StatusState = null | { type: "ok" | "error"; message: string };
 
 export default function BarberDemoPage() {
   const [name, setName] = useState("");
@@ -25,53 +34,69 @@ export default function BarberDemoPage() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [notes, setNotes] = useState("");
-
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<
-    null | { type: "ok" | "error"; message: string }
-  >(null);
+  const [status, setStatus] = useState<StatusState>(null);
 
-  // stato per disponibilità
-  const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+  // stato per disponibilità orari
+  const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [availabilityLoading, setAvailabilityLoading] = useState(false);
   const [availabilityError, setAvailabilityError] = useState<string | null>(
     null
   );
 
-  // === CARICA ORARI LIBERI QUANDO CAMBIA LA DATA ===
-  async function loadAvailability(selectedDate: string) {
-    setAvailabilityLoading(true);
+  // Quando l’utente cambia DATA
+  async function handleDateChange(e: ChangeEvent<HTMLInputElement>) {
+    const newDate = e.target.value;
+    setDate(newDate);
+    setTime(""); // azzero l'orario scelto
     setAvailabilityError(null);
-    setBookedTimes([]);
+    setTimeSlots([]);
 
-    try {
-      const res = await fetch(`/api/availability?date=${selectedDate}`);
-      const data = await res.json();
+    if (!newDate) return;
 
-      if (!res.ok || !data.success) {
-        throw new Error(data?.error || "Errore nel recupero degli orari.");
-      }
-
-      setBookedTimes(Array.isArray(data.bookedTimes) ? data.bookedTimes : []);
-    } catch (err) {
-      console.error("Errore availability:", err);
-      setAvailabilityError(
-        "Non riesco a mostrare gli orari liberi. Puoi comunque provare a prenotare."
-      );
-    } finally {
-      setAvailabilityLoading(false);
-    }
+    await fetchAvailability(newDate);
   }
 
-  function handleDateChange(value: string) {
-    setDate(value);
-    setTime("");
-    setStatus(null);
-    setBookedTimes([]);
-    setAvailabilityError(null);
+  // Chiamata a /api/availability per leggere gli orari liberi da Apps Script
+  async function fetchAvailability(selectedDate: string) {
+    try {
+      setAvailabilityLoading(true);
+      setAvailabilityError(null);
 
-    if (value) {
-      void loadAvailability(value);
+      const res = await fetch("/api/availability", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date: selectedDate }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Risposta non OK da /api/availability");
+      }
+
+      const data = await res.json();
+
+      if (!data.success || !Array.isArray(data.freeSlots)) {
+        throw new Error(data.error || "Struttura risposta non valida");
+      }
+
+      // Nessun orario libero per quella data
+      if (data.freeSlots.length === 0) {
+        setTimeSlots([]);
+        setAvailabilityError(
+          "Per questa data al momento non risultano orari liberi. Scegli un altro giorno."
+        );
+        return;
+      }
+
+      // ✅ Tutto ok: imposto solo gli orari liberi
+      setTimeSlots(data.freeSlots);
+    } catch (err) {
+      console.error("Errore availability:", err);
+      // fallback: mostro tutti gli orari demo, ma SENZA messaggio rosso
+      setTimeSlots(FALLBACK_SLOTS);
+      setAvailabilityError(null);
+    } finally {
+      setAvailabilityLoading(false);
     }
   }
 
@@ -105,32 +130,31 @@ export default function BarberDemoPage() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data?.success) {
-        const msg: string =
+        const msg =
           data?.error ||
-          "Non è stato possibile salvare la prenotazione. Riprova tra poco.";
-        setStatus({ type: "error", message: msg });
-        return;
+          data?.message ||
+          "Si è verificato un errore nel salvare la prenotazione.";
+        throw new Error(msg);
       }
 
       setStatus({
         type: "ok",
-        message:
-          data.message || "✅ Prenotazione inviata alla demo del barbiere.",
+        message: "✅ Prenotazione inviata alla demo del barbiere.",
       });
-
       setName("");
       setPhone("");
       setService("Taglio uomo");
       setDate("");
       setTime("");
       setNotes("");
-      setBookedTimes([]);
+      setTimeSlots([]);
       setAvailabilityError(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setStatus({
         type: "error",
         message:
+          err?.message ||
           "Si è verificato un problema nel salvare la prenotazione di prova. Riprova tra poco.",
       });
     } finally {
@@ -206,7 +230,7 @@ export default function BarberDemoPage() {
             </p>
           </header>
 
-          {/* LAYOUT RESPONSIVE: SU MOBILE IN COLONNA, SU DESKTOP DUE COLONNE */}
+          {/* LAYOUT RESPONSIVE */}
           <div className="barber-layout">
             {/* COLONNA SINISTRA – CHAT + PRENOTAZIONE */}
             <section
@@ -250,8 +274,9 @@ export default function BarberDemoPage() {
                 </ul>
               </div>
 
-              {/* ChatBox */}
-            
+              {/* CHATBOT SETTORE BARBIERE */}
+              <ChatBox sector="barbiere" />
+
               {/* PRENOTAZIONE VELOCE – UN SOLO BLOCCO */}
               <div
                 style={{
@@ -382,7 +407,7 @@ export default function BarberDemoPage() {
                       <input
                         type="date"
                         value={date}
-                        onChange={(e) => handleDateChange(e.target.value)}
+                        onChange={handleDateChange}
                         style={inputFieldStyle}
                       />
                     </div>
@@ -406,51 +431,30 @@ export default function BarberDemoPage() {
                         <option value="">
                           {date
                             ? availabilityLoading
-                              ? "Caricamento orari..."
+                              ? "Carico gli orari liberi..."
                               : "Seleziona un orario"
                             : "Seleziona prima una data"}
                         </option>
-                        {TIME_SLOTS.map((slot) => {
-                          const isBooked = bookedTimes.includes(slot);
-                          return (
-                            <option
-                              key={slot}
-                              value={slot}
-                              disabled={isBooked}
-                            >
-                              {slot} {isBooked ? " (occupato)" : ""}
-                            </option>
-                          );
-                        })}
+                        {timeSlots.map((slot) => (
+                          <option key={slot} value={slot}>
+                            {slot}
+                          </option>
+                        ))}
                       </select>
+
+                      {availabilityError && (
+                        <p
+                          style={{
+                            fontSize: "0.76rem",
+                            color: "#f97316",
+                            marginTop: 4,
+                          }}
+                        >
+                          {availabilityError}
+                        </p>
+                      )}
                     </div>
                   </div>
-
-                  {availabilityError && (
-                    <p
-                      style={{
-                        marginTop: 4,
-                        fontSize: "0.78rem",
-                        color: "#fecaca",
-                      }}
-                    >
-                      {availabilityError}
-                    </p>
-                  )}
-
-                  {date &&
-                    !availabilityLoading &&
-                    bookedTimes.length === TIME_SLOTS.length && (
-                      <p
-                        style={{
-                          marginTop: 4,
-                          fontSize: "0.78rem",
-                          color: "#fecaca",
-                        }}
-                      >
-                        Per questa data non ci sono più orari disponibili.
-                      </p>
-                    )}
 
                   <div>
                     <label
