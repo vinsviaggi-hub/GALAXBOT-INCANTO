@@ -4,6 +4,33 @@
 import { useState, FormEvent, type CSSProperties } from "react";
 import ChatBox from "@/app/components/chatbox";
 
+// Orari disponibili dalle 08:00 alle 19:00 ogni 30 minuti
+const TIME_SLOTS = [
+  "08:00",
+  "08:30",
+  "09:00",
+  "09:30",
+  "10:00",
+  "10:30",
+  "11:00",
+  "11:30",
+  "12:00",
+  "12:30",
+  "13:00",
+  "13:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
+  "17:00",
+  "17:30",
+  "18:00",
+  "18:30",
+  "19:00",
+];
+
 export default function BarberDemoPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -164,20 +191,23 @@ export default function BarberDemoPage() {
                   Come provare questa demo di prenotazione
                 </div>
                 <ul style={{ paddingLeft: "1.1rem", margin: 0 }}>
-                  <li>Fai una domanda al bot nella chat in alto (orari, servizi, prezzi).</li>
+                  <li>
+                    Fai una domanda al bot nella chat in alto (orari, servizi,
+                    prezzi).
+                  </li>
                   <li>
                     Per registrare una prenotazione di prova usa il box
                     “Prenotazione veloce dal bot” sotto la chat.
                   </li>
                   <li>
-                    Se scegli una data passata o un orario già occupato, il sistema ti avvisa e
-                    non salva la prenotazione.
+                    Se scegli una data passata o un orario già occupato, il
+                    sistema ti avvisa e non salva la prenotazione.
                   </li>
                 </ul>
               </div>
 
               {/* CHATBOX */}
-              <ChatBox />
+              <ChatBox sector="barbiere" />
 
               {/* PRENOTAZIONE VELOCE – UN SOLO BLOCCO */}
               <div
@@ -324,12 +354,22 @@ export default function BarberDemoPage() {
                       >
                         Ora
                       </label>
-                      <input
-                        type="time"
+                      <select
                         value={time}
                         onChange={(e) => setTime(e.target.value)}
-                        style={inputFieldStyle}
-                      />
+                        style={{
+                          ...inputFieldStyle,
+                          cursor: "pointer",
+                          backgroundColor: "#020617",
+                        }}
+                      >
+                        <option value="">Seleziona un orario</option>
+                        {TIME_SLOTS.map((slot) => (
+                          <option key={slot} value={slot}>
+                            {slot}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 

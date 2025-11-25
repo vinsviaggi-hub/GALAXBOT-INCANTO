@@ -1,3 +1,4 @@
+// app/components/chatbox.tsx
 "use client";
 
 import {
@@ -12,12 +13,34 @@ type Message = {
   text: string;
 };
 
-export default function ChatBox() {
+type Sector =
+  | "barbiere"
+  | "bar"
+  | "pasticceria"
+  | "estetica"
+  | "studiomedico"
+  | "veterinario"
+  | "ecommerce"
+  | "palestra"
+  | "pizzeria"
+  | "ristorante"
+  | "gelateria"
+  | "parrucchiera"
+  | "hotel"
+  | "immobiliare"
+  | "abbigliamento"
+  | "altro";
+
+type ChatBoxProps = {
+  sector: Sector;
+};
+
+export default function ChatBox({ sector }: ChatBoxProps) {
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "bot",
       text:
-        "Ciao! 👋 Sono il bot del barber shop. Puoi farmi domande sui servizi.\n\n⚠️ Per prenotare davvero un appuntamento usa il box qui sotto: «Prenotazione veloce dal bot» 💈",
+        "Ciao! 👋 Sono il bot. Puoi farmi domande sui servizi.\n\n⚠️ Per registrare una prenotazione usa il box sotto la chat (se presente).",
     },
   ]);
   const [input, setInput] = useState("");
@@ -34,7 +57,6 @@ export default function ChatBox() {
 
     const userText = input.trim();
 
-    // aggiungo il messaggio dell’utente in coda alla conversazione
     const newMessages: Message[] = [
       ...messages,
       { sender: "user", text: userText },
@@ -48,7 +70,10 @@ export default function ChatBox() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: newMessages }),
+        body: JSON.stringify({
+          messages: newMessages,
+          sector, // 👉 passiamo il settore all'API
+        }),
       });
 
       if (!res.ok) {
