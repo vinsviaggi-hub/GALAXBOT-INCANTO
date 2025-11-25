@@ -1,33 +1,20 @@
-// app/demos/barbiere/page.tsx
 "use client";
 
 import { useState, FormEvent, type CSSProperties } from "react";
 import ChatBox from "@/app/components/chatbox";
 
-// Orari disponibili dalle 08:00 alle 19:00 ogni 30 minuti
-const TIME_SLOTS = [
+const TIME_SLOTS: string[] = [
   "08:00",
-  "08:30",
   "09:00",
-  "09:30",
   "10:00",
-  "10:30",
   "11:00",
-  "11:30",
   "12:00",
-  "12:30",
   "13:00",
-  "13:30",
   "14:00",
-  "14:30",
   "15:00",
-  "15:30",
   "16:00",
-  "16:30",
   "17:00",
-  "17:30",
   "18:00",
-  "18:30",
   "19:00",
 ];
 
@@ -38,10 +25,55 @@ export default function BarberDemoPage() {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [notes, setNotes] = useState("");
+
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<
     null | { type: "ok" | "error"; message: string }
   >(null);
+
+  // stato per disponibilità
+  const [bookedTimes, setBookedTimes] = useState<string[]>([]);
+  const [availabilityLoading, setAvailabilityLoading] = useState(false);
+  const [availabilityError, setAvailabilityError] = useState<string | null>(
+    null
+  );
+
+  // === CARICA ORARI LIBERI QUANDO CAMBIA LA DATA ===
+  async function loadAvailability(selectedDate: string) {
+    setAvailabilityLoading(true);
+    setAvailabilityError(null);
+    setBookedTimes([]);
+
+    try {
+      const res = await fetch(`/api/availability?date=${selectedDate}`);
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data?.error || "Errore nel recupero degli orari.");
+      }
+
+      setBookedTimes(Array.isArray(data.bookedTimes) ? data.bookedTimes : []);
+    } catch (err) {
+      console.error("Errore availability:", err);
+      setAvailabilityError(
+        "Non riesco a mostrare gli orari liberi. Puoi comunque provare a prenotare."
+      );
+    } finally {
+      setAvailabilityLoading(false);
+    }
+  }
+
+  function handleDateChange(value: string) {
+    setDate(value);
+    setTime("");
+    setStatus(null);
+    setBookedTimes([]);
+    setAvailabilityError(null);
+
+    if (value) {
+      void loadAvailability(value);
+    }
+  }
 
   async function handleBooking(e: FormEvent) {
     e.preventDefault();
@@ -70,20 +102,30 @@ export default function BarberDemoPage() {
         }),
       });
 
-      if (!res.ok) {
-        throw new Error("Errore nella richiesta");
+      const data = await res.json().catch(() => null);
+
+      if (!res.ok || !data?.success) {
+        const msg: string =
+          data?.error ||
+          "Non è stato possibile salvare la prenotazione. Riprova tra poco.";
+        setStatus({ type: "error", message: msg });
+        return;
       }
 
       setStatus({
         type: "ok",
-        message: "✅ Prenotazione inviata alla demo del barbiere.",
+        message:
+          data.message || "✅ Prenotazione inviata alla demo del barbiere.",
       });
+
       setName("");
       setPhone("");
       setService("Taglio uomo");
       setDate("");
       setTime("");
       setNotes("");
+      setBookedTimes([]);
+      setAvailabilityError(null);
     } catch (err) {
       console.error(err);
       setStatus({
@@ -167,7 +209,9 @@ export default function BarberDemoPage() {
           {/* LAYOUT RESPONSIVE: SU MOBILE IN COLONNA, SU DESKTOP DUE COLONNE */}
           <div className="barber-layout">
             {/* COLONNA SINISTRA – CHAT + PRENOTAZIONE */}
-            <section style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+            <section
+              style={{ display: "flex", flexDirection: "column", gap: 16 }}
+            >
               {/* Box istruzioni */}
               <div
                 style={{
@@ -206,9 +250,8 @@ export default function BarberDemoPage() {
                 </ul>
               </div>
 
-              {/* CHATBOX */}
-              <ChatBox sector="barbiere" />
-
+              {/* ChatBox */}
+            
               {/* PRENOTAZIONE VELOCE – UN SOLO BLOCCO */}
               <div
                 style={{
@@ -241,9 +284,9 @@ export default function BarberDemoPage() {
                   }}
                 >
                   Compila questi campi e il sistema salva la prenotazione
-                  direttamente nel pannello del barbiere (foglio Google di test).
-                  I messaggi scritti nella chat <strong>non</strong> creano
-                  prenotazioni.
+                  direttamente nel pannello del barbiere (foglio Google di
+                  test). I messaggi scritti nella chat <strong>non</strong>{" "}
+                  creano prenotazioni.
                 </p>
 
                 <form
@@ -339,7 +382,7 @@ export default function BarberDemoPage() {
                       <input
                         type="date"
                         value={date}
-                        onChange={(e) => setDate(e.target.value)}
+                        onChange={(e) => handleDateChange(e.target.value)}
                         style={inputFieldStyle}
                       />
                     </div>
@@ -357,21 +400,57 @@ export default function BarberDemoPage() {
                       <select
                         value={time}
                         onChange={(e) => setTime(e.target.value)}
-                        style={{
-                          ...inputFieldStyle,
-                          cursor: "pointer",
-                          backgroundColor: "#020617",
-                        }}
+                        style={inputFieldStyle}
+                        disabled={!date || availabilityLoading}
                       >
-                        <option value="">Seleziona un orario</option>
-                        {TIME_SLOTS.map((slot) => (
-                          <option key={slot} value={slot}>
-                            {slot}
-                          </option>
-                        ))}
+                        <option value="">
+                          {date
+                            ? availabilityLoading
+                              ? "Caricamento orari..."
+                              : "Seleziona un orario"
+                            : "Seleziona prima una data"}
+                        </option>
+                        {TIME_SLOTS.map((slot) => {
+                          const isBooked = bookedTimes.includes(slot);
+                          return (
+                            <option
+                              key={slot}
+                              value={slot}
+                              disabled={isBooked}
+                            >
+                              {slot} {isBooked ? " (occupato)" : ""}
+                            </option>
+                          );
+                        })}
                       </select>
                     </div>
                   </div>
+
+                  {availabilityError && (
+                    <p
+                      style={{
+                        marginTop: 4,
+                        fontSize: "0.78rem",
+                        color: "#fecaca",
+                      }}
+                    >
+                      {availabilityError}
+                    </p>
+                  )}
+
+                  {date &&
+                    !availabilityLoading &&
+                    bookedTimes.length === TIME_SLOTS.length && (
+                      <p
+                        style={{
+                          marginTop: 4,
+                          fontSize: "0.78rem",
+                          color: "#fecaca",
+                        }}
+                      >
+                        Per questa data non ci sono più orari disponibili.
+                      </p>
+                    )}
 
                   <div>
                     <label
