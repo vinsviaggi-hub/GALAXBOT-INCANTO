@@ -1,77 +1,70 @@
 import { NextRequest, NextResponse } from "next/server";
 
-export const runtime = "nodejs";
+const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN!;
+const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN!;
+const WHATSAPP_API_VERSION = process.env.WHATSAPP_API_VERSION ?? "v21.0";
+const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID!;
 
-// === Helpers ===
+type WaTextMessage = {
+  from: string;
+  id: string;
+  timestamp: string;
+  type: "text";
+  text?: {
+    body: string;
+  };
+};
 
-async function askInternalChat(text: string, sector: string) {
-  // URL dell’API chat interna (la stessa che usa il demo barbiere)
-  const url =
-    process.env.INTERNAL_CHAT_URL || "http://localhost:3000/api/chat";
+type WaWebhookBody = {
+  entry?: Array<{
+    changes?: Array<{
+      value?: {
+        messages?: WaTextMessage[];
+        contacts?: { wa_id: string }[];
+      };
+    }>;
+  }>;
+};
 
-  try {
-    const chatRes = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        text,
-        sector,
-        source: "whatsapp",
-      }),
-    });
+// -------------------- UTILITY --------------------
 
-    if (!chatRes.ok) {
-      console.error(
-        "[WA] Errore chiamando la chat interna:",
-        chatRes.status,
-        await chatRes.text()
-      );
-      return "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco.";
-    }
+function extractTextMessage(body: WaWebhookBody): { from: string; text: string } | null {
+  const entry = body.entry?.[0];
+  const change = entry?.changes?.[0];
+  const value = change?.value;
+  const msg = value?.messages?.[0];
 
-    const data = (await chatRes.json().catch(() => null)) as
-      | { reply?: string }
-      | null;
-
-    return (
-      data?.reply ||
-      "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco."
-    );
-  } catch (err) {
-    console.error("[WA] Errore di rete chiamando la chat interna:", err);
-    return "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco.";
+  if (!msg) {
+    console.log("[WA] Nessun messaggio nel payload.");
+    return null;
   }
+
+  if (msg.type === "text" && msg.text?.body) {
+    console.log("[WA] Messaggio testuale ricevuto:", msg.text.body);
+    return {
+      from: msg.from,
+      text: msg.text.body,
+    };
+  }
+
+  console.log("[WA] Messaggio non testuale, type:", msg.type);
+  return null;
 }
 
-async function sendWhatsAppMessage(to: string, body: string) {
-  const token = process.env.WHATSAPP_TOKEN;
-  const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID;
-  const apiVersion = process.env.WHATSAPP_API_VERSION || "v21.0";
-
-  if (!token || !phoneNumberId) {
-    console.error(
-      "[WA] Mancano WHATSAPP_TOKEN o WHATSAPP_PHONE_NUMBER_ID nelle env"
-    );
-    return { ok: false };
-  }
-
-  const url = `https://graph.facebook.com/${apiVersion}/${phoneNumberId}/messages`;
+async function sendWhatsappMessage(to: string, body: string) {
+  const url = `https://graph.facebook.com/${WHATSAPP_API_VERSION}/${WHATSAPP_PHONE_NUMBER_ID}/messages`;
 
   try {
     const res = await fetch(url, {
       method: "POST",
       headers: {
+        Authorization: `Bearer ${WHATSAPP_TOKEN}`,
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({
         messaging_product: "whatsapp",
         to,
-        text: {
-          body,
-        },
+        text: { body },
       }),
     });
 
@@ -79,109 +72,134 @@ async function sendWhatsAppMessage(to: string, body: string) {
 
     if (!res.ok) {
       console.error("[WA] Errore nell'invio del messaggio:", res.status, data);
-      return { ok: false, data };
+    } else {
+      console.log("[WA] Messaggio WhatsApp inviato con successo:", data);
     }
-
-    console.log("[WA] Messaggio WhatsApp inviato con successo:", data);
-    return { ok: true, data };
   } catch (err) {
     console.error("[WA] Errore di rete inviando il messaggio:", err);
-    return { ok: false };
   }
 }
 
-// === GET: verifica webhook ===
+async function askInternalChat(origin: string, text: string, sector: string) {
+  try {
+    const url = `${origin}/api/whatsapp-internal-chat`;
+
+    const chatRes = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, sector }),
+    });
+
+    const data = (await chatRes.json().catch(() => null)) as
+      | { reply?: string }
+      | null;
+
+    if (!chatRes.ok) {
+      console.error(
+        "[WA] /api/whatsapp-internal-chat non ok:",
+        chatRes.status,
+        data
+      );
+      return null;
+    }
+
+    if (!data?.reply) {
+      console.log("[WA] Nessuna reply dal bot interno.");
+      return null;
+    }
+
+    console.log("[WA] Reply dal bot interno:", data.reply);
+    return data.reply;
+  } catch (err) {
+    console.error("[WA] Errore chiamando internal chat:", err);
+    return null;
+  }
+}
+
+// -------------------- HANDLER VERIFICA (GET) --------------------
 
 export async function GET(req: NextRequest) {
-  const url = new URL(req.url);
-  const mode = url.searchParams.get("hub.mode");
-  const token = url.searchParams.get("hub.verify_token");
-  const challenge = url.searchParams.get("hub.challenge");
+  const { searchParams } = new URL(req.url);
+  const mode = searchParams.get("hub.mode");
+  const token = searchParams.get("hub.verify_token");
+  const challenge = searchParams.get("hub.challenge");
 
-  const verifyToken = process.env.WHATSAPP_VERIFY_TOKEN;
-
-  if (mode === "subscribe" && token === verifyToken) {
-    console.log("[WA] Webhook verificato correttamente");
-    return new Response(challenge ?? "", { status: 200 });
+  if (mode === "subscribe" && token === VERIFY_TOKEN && challenge) {
+    return new Response(challenge, { status: 200 });
   }
 
-  console.warn("[WA] Verification token mismatch", {
-    mode,
-    token,
-    expected: verifyToken,
-  });
-
-  return new Response("Verification token mismatch", { status: 403 });
+  return NextResponse.json(
+    { ok: true, message: "Webhook WhatsApp GalaxBot AI attivo." },
+    { status: 200 }
+  );
 }
 
-// === POST: riceve i messaggi ===
+// -------------------- HANDLER MESSAGGI (POST) --------------------
 
 export async function POST(req: NextRequest) {
-  const payload = (await req.json().catch(() => null)) as any;
+  // 1) Leggiamo il body
+  const rawBody = await req.json().catch(() => null);
+  console.log("[WA] Webhook body:", JSON.stringify(rawBody, null, 2));
 
-  if (!payload) {
-    return NextResponse.json(
-      { ok: false, error: "Invalid JSON" },
-      { status: 400 }
-    );
-  }
+  // Se è il body di test (quando usiamo curl in locale)
+  if (rawBody && typeof rawBody.text === "string" && rawBody.sector) {
+    const reply =
+      (await askInternalChat(req.nextUrl.origin, rawBody.text, rawBody.sector)) ??
+      "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco.";
 
-  // ---- Modalità TEST (curl) ----
-  if (typeof payload.text === "string" && payload.sector) {
-    const text = (payload.text as string).trim();
-    const sector = String(payload.sector || "barbiere");
-
-    const reply = await askInternalChat(text, sector);
-
-    // In test NON mando niente a WhatsApp, rispondo solo in JSON
     return NextResponse.json(
       {
         success: true,
         mode: "test",
-        input: text,
-        sector,
+        input: rawBody.text,
+        sector: rawBody.sector,
         reply,
       },
       { status: 200 }
     );
   }
 
-  // ---- Payload reale di WhatsApp Cloud API ----
-  const entry = Array.isArray(payload.entry) ? payload.entry[0] : undefined;
-  const changes = entry?.changes && entry.changes[0];
-  const value = changes?.value;
-  const messages = Array.isArray(value?.messages) ? value.messages : [];
-  const msg = messages[0];
+  // 2) Payload vero di WhatsApp
+  const body = rawBody as WaWebhookBody | null;
 
-  if (!msg) {
-    // Nessun messaggio (magari solo status); rispondi 200 per evitare retry
-    console.log("[WA] Nessun messaggio da processare", payload);
-    return NextResponse.json({ success: true, ignored: true }, { status: 200 });
+  if (!body) {
+    console.error("[WA] Body mancante o non valido.");
+    return NextResponse.json(
+      {
+        success: false,
+        reply:
+          "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco.",
+      },
+      { status: 200 }
+    );
   }
 
-  const from = msg.from as string | undefined; // numero dell’utente
-  const textBody: string | undefined = msg.text?.body;
+  const message = extractTextMessage(body);
 
-  if (!from || !textBody) {
-    console.log("[WA] Messaggio senza from o text, ignorato");
-    return NextResponse.json({ success: true, ignored: true }, { status: 200 });
+  if (!message) {
+    return NextResponse.json(
+      {
+        success: true,
+        reply:
+          "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco.",
+      },
+      { status: 200 }
+    );
   }
 
-  const userText = textBody.trim();
-  // Per ora fissiamo il settore a "barbiere" (come il demo)
-  const sector = "barbiere";
+  const sector = "barbiere"; // per ora fisso
 
-  const reply = await askInternalChat(userText, sector);
+  const reply =
+    (await askInternalChat(req.nextUrl.origin, message.text, sector)) ??
+    "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco.";
 
-  // Mando la risposta su WhatsApp
-  await sendWhatsAppMessage(from, reply);
+  // 3) Rispondiamo su WhatsApp
+  await sendWhatsappMessage(message.from, reply);
 
-  // Rispondo a Meta con 200
   return NextResponse.json(
     {
       success: true,
-      from,
-      input: userText,
+      input: message.text,
       sector,
       reply,
     },

@@ -1,84 +1,93 @@
+// app/api/whatsapp-internal-chat/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+type Body = {
+  input?: string;
+  sector?: string;
+};
+
+const FALLBACK_REPLY =
+  "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco.";
 
 /**
- * API interna usata SOLO dal webhook WhatsApp.
- * Riceve: { text: string, sector?: string }
- * Restituisce: { reply: string }
+ * Endpoint interno usato SOLO dal webhook WhatsApp.
+ * Riceve: { input, sector }
+ * Risponde: { reply }
  */
 export async function POST(req: NextRequest) {
   try {
-    const body = (await req.json().catch(() => null)) as
-      | { text?: string; sector?: string }
-      | null;
+    const body = (await req.json()) as Body;
+    const input = body.input?.trim();
+    const sector = body.sector?.trim() || "generico";
 
-    const text = body?.text?.trim() || "";
-    const sector = body?.sector || "generico";
-
-    if (!text) {
+    if (!input) {
       return NextResponse.json(
         { reply: "Non ho ricevuto nessun messaggio da elaborare." },
         { status: 400 }
       );
     }
 
+    // Prompt diverso se è barbiere
     const systemPrompt =
       sector === "barbiere"
         ? `Sei il bot di un barber shop.
-Rispondi SEMPRE in italiano, in modo chiaro e amichevole.
-Compito:
-- Capisci se il messaggio parla di PRENOTAZIONI (giorno, orario, servizio)
-- Se capisci già giorno e ora, conferma e chiedi solo il nome e un contatto (telefono / Instagram).
-- Se i dettagli non sono chiari, fai 1-2 domande brevi per chiarire.
-- Se la domanda è solo informativa (prezzi, servizi, orari), rispondi con info utili e poi proponi di prenotare.
-NON parlare di API, JSON o cose tecniche.`
-        : `Sei un assistente per un'azienda. Rispondi in italiano, in modo semplice e utile.`;
+- Rispondi SEMPRE in italiano, in modo chiaro e amichevole.
+- Aiuta il cliente a prenotare tagli di capelli, barba, trattamenti.
+- Se il cliente chiede un orario specifico, conferma la richiesta e chiedi nome e numero di telefono (o contatto WhatsApp / Instagram) per completare la prenotazione.
+- Non parlare di come funzionano le API o la tecnologia, parla sempre come un assistente del negozio.`
+        : `Sei un assistente virtuale gentile e professionale.
+- Rispondi SEMPRE in italiano.
+- Dai risposte brevi, chiare e utili all'utente.
+- Non parlare di API o codice, parla come un normale assistente umano.`;
 
-    const response = await openai.responses.create({
-      model: "gpt-4.1-mini",
-      input: [
-        {
-          role: "system",
-          content: systemPrompt,
-        },
-        {
-          role: "user",
-          content: text,
-        },
-      ],
-    });
-
-    let reply =
-      "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco.";
-
-    try {
-      const output = (response as any).output?.[0];
-      const firstContent = output?.content?.[0];
-
-      if (firstContent?.type === "output_text" && firstContent?.text) {
-        reply = firstContent.text;
-      } else if (firstContent?.text) {
-        reply = firstContent.text;
-      }
-    } catch {
-      // se qualcosa va storto nell'estrazione, usiamo il fallback
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      console.error("[WA-INTERNAL] OPENAI_API_KEY mancante");
+      return NextResponse.json({ reply: FALLBACK_REPLY }, { status: 500 });
     }
 
-    return NextResponse.json({ reply });
-  } catch (err) {
-    console.error("[WA-INTERNAL-CHAT] Errore generale:", err);
-    return NextResponse.json(
+    const openaiRes = await fetch(
+      "https://api.openai.com/v1/chat/completions",
       {
-        reply:
-          "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco.",
-      },
-      { status: 500 }
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify({
+          model: "gpt-4.1-mini",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: input },
+          ],
+          temperature: 0.6,
+          max_tokens: 350,
+        }),
+      }
     );
+
+    if (!openaiRes.ok) {
+      const text = await openaiRes.text().catch(() => "");
+      console.error(
+        "[WA-INTERNAL] Errore chiamando OpenAI:",
+        openaiRes.status,
+        text
+      );
+      return NextResponse.json({ reply: FALLBACK_REPLY }, { status: 500 });
+    }
+
+    const data = (await openaiRes.json()) as any;
+    const reply: string | undefined =
+      data?.choices?.[0]?.message?.content?.trim();
+
+    if (!reply) {
+      console.error("[WA-INTERNAL] Nessuna reply da OpenAI", data);
+      return NextResponse.json({ reply: FALLBACK_REPLY }, { status: 500 });
+    }
+
+    return NextResponse.json({ reply }, { status: 200 });
+  } catch (err) {
+    console.error("[WA-INTERNAL] Errore interno:", err);
+    return NextResponse.json({ reply: FALLBACK_REPLY }, { status: 500 });
   }
 }
-
-export const dynamic = "force-dynamic";
