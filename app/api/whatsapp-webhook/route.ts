@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 
-// === CONFIG WhatsApp / OpenAI ===
+// === CONFIG WhatsApp ===
 const VERIFY_TOKEN = process.env.WHATSAPP_VERIFY_TOKEN;
 const WHATSAPP_TOKEN = process.env.WHATSAPP_TOKEN;
 const WHATSAPP_API_VERSION = process.env.WHATSAPP_API_VERSION ?? "v21.0";
@@ -8,15 +8,6 @@ const WHATSAPP_PHONE_NUMBER_ID = process.env.WHATSAPP_PHONE_NUMBER_ID;
 
 const FALLBACK_REPLY =
   "Al momento non riesco a rispondere dal bot. Puoi riprovare tra poco.";
-
-// URL dell'endpoint interno che parla con OpenAI
-const INTERNAL_CHAT_URL =
-  process.env.INTERNAL_CHAT_URL ||
-  `${
-    process.env.VERCEL_URL
-      ? `https://${process.env.VERCEL_URL}`
-      : "http://localhost:3000"
-  }/api/whatsapp-internal-chat`;
 
 // ========== GET: VERIFICA WEBHOOK (META) ==========
 export async function GET(req: NextRequest) {
@@ -38,10 +29,21 @@ export async function GET(req: NextRequest) {
   );
 }
 
-// ========== FUNZIONE: CHIAMA CHAT INTERNA ==========
-async function callInternalChat(input: string): Promise<string> {
+// ========== FUNZIONE: CHIAMA LA CHAT INTERNA ==========
+async function callInternalChat(
+  req: NextRequest,
+  input: string
+): Promise<string> {
+  const origin =
+    req.nextUrl.origin ||
+    (process.env.VERCEL_URL
+      ? `https://${process.env.VERCEL_URL}`
+      : "http://localhost:3000");
+
+  const url = `${origin}/api/whatsapp-internal-chat`;
+
   try {
-    const res = await fetch(INTERNAL_CHAT_URL, {
+    const res = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -61,11 +63,12 @@ async function callInternalChat(input: string): Promise<string> {
       return FALLBACK_REPLY;
     }
 
-    if (typeof data.reply === "string" && data.reply.trim().length > 0) {
-      return data.reply.trim();
-    }
+    const reply =
+      typeof data.reply === "string" && data.reply.trim().length > 0
+        ? data.reply.trim()
+        : FALLBACK_REPLY;
 
-    return FALLBACK_REPLY;
+    return reply;
   } catch (err) {
     console.error("[WA-INTERNAL] Errore chiamando la chat interna:", err);
     return FALLBACK_REPLY;
@@ -136,8 +139,7 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 🔧 FIX IMPORTANTE:
-  // cerca la change con field === "messages" e con almeno 1 messaggio
+  // 🔧 CERCA SOLO LA CHANGE CON field === "messages"
   const messageChange = changes.find(
     (c) => c.field === "messages" && c.value?.messages?.length
   );
@@ -160,6 +162,8 @@ export async function POST(req: NextRequest) {
     text = waMessage.text?.body ?? "";
   } else if (waMessage.type === "button") {
     text = waMessage.button?.text ?? "";
+  } else {
+    console.log("[WA] Messaggio non testuale, type:", waMessage.type);
   }
 
   text = text.trim();
@@ -171,7 +175,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Chiamo la nostra chat interna (OpenAI)
-  const reply = await callInternalChat(text);
+  const reply = await callInternalChat(req, text);
 
   // Rispondo su WhatsApp
   await sendWhatsappMessage(from, reply);
