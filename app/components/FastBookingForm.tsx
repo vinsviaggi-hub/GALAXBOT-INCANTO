@@ -1,0 +1,238 @@
+"use client";
+
+import { useState, useEffect, FormEvent } from "react";
+
+type FreeSlot = string;
+
+export default function FastBookingForm() {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [service, setService] = useState("");
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+  const [notes, setNotes] = useState("");
+
+  const [freeSlots, setFreeSlots] = useState<FreeSlot[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  // Quando cambia la data, carico gli orari disponibili
+  useEffect(() => {
+    if (!date) return;
+    void loadAvailability(date);
+  }, [date]);
+
+  async function loadAvailability(selectedDate: string) {
+    try {
+      setLoadingSlots(true);
+      setErrorMessage("");
+      setSuccessMessage("");
+      setFreeSlots([]);
+      setTime("");
+
+      const res = await fetch("/api/barber-booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "get_availability",
+          date: selectedDate,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || "Errore nel recupero degli orari.");
+      }
+
+      setFreeSlots(data.freeSlots || []);
+    } catch (err: any) {
+      console.error("[BOOKING] Errore get_availability:", err);
+      setErrorMessage(
+        err?.message || "Errore inatteso durante il recupero degli orari."
+      );
+    } finally {
+      setLoadingSlots(false);
+    }
+  }
+
+  const handleSubmit = async (e: FormEvent) => {
+    e.preventDefault();
+    setErrorMessage("");
+    setSuccessMessage("");
+
+    if (!name || !service || !date || !time) {
+      setErrorMessage("Compila almeno nome, servizio, data e ora.");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const res = await fetch("/api/barber-booking", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_booking",
+          name,
+          phone,
+          service,
+          date,
+          time,
+          notes,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || !data.success) {
+        if (data.conflict) {
+          setErrorMessage(
+            "Questo orario è già occupato. Scegli un altro slot libero."
+          );
+        } else {
+          setErrorMessage(data.error || "Errore durante la prenotazione.");
+        }
+        return;
+      }
+
+      setSuccessMessage("Prenotazione salvata correttamente! ✅");
+      setName("");
+      setPhone("");
+      setService("");
+      setNotes("");
+      setTime("");
+
+      // Ricarico gli slot liberi per quella data
+      if (date) {
+        void loadAvailability(date);
+      }
+    } catch (err: any) {
+      console.error("[BOOKING] Errore create_booking:", err);
+      setErrorMessage(
+        err?.message || "Errore inatteso durante la prenotazione."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="w-full space-y-4">
+      <h2 className="text-lg font-semibold">Prenotazione veloce</h2>
+
+      {/* MESSAGGI */}
+      {errorMessage && (
+        <div className="rounded-md border border-red-400 bg-red-50 px-3 py-2 text-sm text-red-700">
+          {errorMessage}
+        </div>
+      )}
+      {successMessage && (
+        <div className="rounded-md border border-emerald-400 bg-emerald-50 px-3 py-2 text-sm text-emerald-700">
+          {successMessage}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-3">
+        {/* NOME */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Nome cliente *</label>
+          <input
+            type="text"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            placeholder="Es. Marco"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+        </div>
+
+        {/* TELEFONO */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Telefono</label>
+          <input
+            type="tel"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            placeholder="Es. 3331234567"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+          />
+        </div>
+
+        {/* SERVIZIO */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Servizio *</label>
+          <input
+            type="text"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            placeholder="Es. Taglio uomo, barba..."
+            value={service}
+            onChange={(e) => setService(e.target.value)}
+          />
+        </div>
+
+        {/* DATA */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Data *</label>
+          <input
+            type="date"
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+          />
+        </div>
+
+        {/* ORARI DISPONIBILI */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Orario *</label>
+
+          {loadingSlots ? (
+            <div className="text-xs text-gray-500">
+              Caricamento orari disponibili...
+            </div>
+          ) : freeSlots.length === 0 && date ? (
+            <div className="text-xs text-gray-500">
+              Nessun orario libero per questa data.
+            </div>
+          ) : null}
+
+          <select
+            className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            disabled={loadingSlots || freeSlots.length === 0}
+          >
+            <option value="">Seleziona un orario</option>
+            {freeSlots.map((slot) => (
+              <option key={slot} value={slot}>
+                {slot}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* NOTE */}
+        <div className="space-y-1">
+          <label className="text-sm font-medium">Note (facoltative)</label>
+          <textarea
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+            rows={3}
+            placeholder="Es. Preferenze, indicazioni particolari..."
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+          />
+        </div>
+
+        {/* BOTTONE */}
+        <button
+          type="submit"
+          disabled={submitting}
+          className="mt-2 w-full rounded-md bg-black px-4 py-2 text-sm font-semibold text-white disabled:opacity-60"
+        >
+          {submitting ? "Invio prenotazione..." : "Conferma prenotazione"}
+        </button>
+      </form>
+    </div>
+  );
+}
