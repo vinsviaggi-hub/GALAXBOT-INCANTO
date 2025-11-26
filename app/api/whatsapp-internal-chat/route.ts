@@ -6,9 +6,9 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const FALLBACK_REPLY =
   "Al momento il bot non è disponibile. Riprova tra qualche minuto.";
 
-// parole di ringraziamento brevi: risposta fissa, senza parlare di nuove prenotazioni
+// Messaggi brevi di ringraziamento: risposta fissa, senza parlare di nuove prenotazioni
 const THANK_YOU_REGEX =
-  /(grazie|grazie mille|ok grazie|ti ringrazio|thank you)/i;
+  /(grazie mille|ok grazie|ok, grazie|ti ringrazio|grazie|thank you)/i;
 
 export async function POST(req: NextRequest) {
   let body: any;
@@ -29,10 +29,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // 🔒 Caso speciale: messaggio breve di ringraziamento
-  if (THANK_YOU_REGEX.test(input) && input.length <= 60) {
+  // 🔒 Caso speciale: solo ringraziamenti / chiusura conversazione
+  if (THANK_YOU_REGEX.test(input) && input.length <= 80) {
     const reply =
-      "Non c'è di che! Se ti serve modificare qualcosa o hai altre domande, scrivimi pure. 😊";
+      "Non c'è di che! 😊 Se hai bisogno di modificare la prenotazione o hai altre domande, scrivimi pure.";
     return NextResponse.json({ reply }, { status: 200 });
   }
 
@@ -46,27 +46,30 @@ export async function POST(req: NextRequest) {
       ? `
 Sei il bot WhatsApp di un barber shop.
 
-REGOLE IMPORTANTI:
+REGOLE IMPORTANTI (SEMPRE):
 
-1. Rispondi sempre e solo in ITALIANO, tono amichevole ma professionale.
+1. Rispondi solo in ITALIANO, tono amichevole ma professionale.
 2. Aiuta il cliente a:
    - chiedere informazioni su servizi, orari, prezzi;
-   - fare, modificare o cancellare prenotazioni.
-3. Se il cliente sta facendo una prenotazione, guida tu con domande chiare:
-   - nome
-   - servizio (es. taglio, barba, taglio + barba)
-   - data
-   - orario
-   - numero di telefono se non è già chiaro dal contesto.
-4. Dopo aver confermato una prenotazione:
-   - conferma in modo chiaro cosa hai registrato (servizio, data, ora);
-   - NON proporre subito di prenotare altri appuntamenti;
-   - chiudi in modo gentile, dicendo che può scrivere se gli serve modificare o avere altre info.
-5. Non inventare mai prezzi reali, numeri di telefono o politiche del negozio.
-6. Se non sei sicuro di qualcosa, rispondi in modo generico (es. "ti consiglio di chiedere in negozio per i dettagli esatti").
+   - fare una prenotazione;
+   - modificare o cancellare una prenotazione già fatta.
+3. Quando il cliente vuole prenotare:
+   - chiedi con domande brevi e chiare:
+     • nome
+     • servizio (taglio, barba, taglio + barba, ecc.)
+     • giorno (data)
+     • orario
+     • telefono se non è chiaro dal contesto
+   - riassumi SEMPRE prima di confermare:
+     "Perfetto, ti ho prenotato per [SERVIZIO] il [DATA] alle [ORA]."
+4. Non parlare di "gestionale", "sistema interno" o cose tecniche.
+5. Dopo aver confermato una prenotazione:
+   - non proporre subito di fare un altro appuntamento;
+   - chiudi con una frase semplice, tipo:
+     "Se hai bisogno di modificare qualcosa o hai altre domande, scrivimi pure."
+6. Non inventare prezzi reali o politiche del negozio: se servono dettagli precisi, dì di chiedere direttamente in negozio.
 
-Per tutte le altre domande (informazioni generali, consigli, ecc.)
-rispondi in modo chiaro, sintetico e utile, come un vero barbiere digitale.
+Per tutte le altre domande rispondi in modo chiaro, sintetico e utile, come un vero barbiere digitale.
 `.trim()
       : `
 Sei un assistente per un'attività locale.
