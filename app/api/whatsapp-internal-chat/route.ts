@@ -11,14 +11,14 @@ type BookingStep = "idle" | "collecting" | "completed";
 type BookingState = {
   step: BookingStep;
   service?: string;
-  date?: string; // formato ISO: yyyy-mm-dd
+  date?: string; // ISO: yyyy-mm-dd
   time?: string; // HH:mm
   name?: string;
   phone?: string;
   lastCompletedAt?: number;
 };
 
-// ⚠️ Memoria in-RAM: per demo va bene, non è garantita eterna su Vercel
+// Memoria in RAM (demo)
 const sessions = new Map<string, BookingState>();
 
 function getSession(phone: string): BookingState {
@@ -34,10 +34,10 @@ function saveSession(phone: string, state: BookingState) {
 }
 
 function isThanks(text: string): boolean {
-  const t = text.toLowerCase();
+  const t = text.toLowerCase().trim();
   return (
     t === "grazie" ||
-    t.includes("grazie mille") ||
+    t === "grazie mille" ||
     t === "ok" ||
     t === "ok grazie" ||
     t.includes("perfetto, grazie") ||
@@ -57,14 +57,13 @@ function hasBookingKeyword(text: string): boolean {
   );
 }
 
-// --- parsing helper ---
+// --- helper parsing ---
 
 function extractPhone(from: string, text: string): string {
   const digitsInText = text.replace(/\D/g, "");
   if (digitsInText.length >= 8 && digitsInText.length <= 13) {
     return digitsInText;
   }
-  // fallback: numero WhatsApp
   return from.replace(/\D/g, "") || from;
 }
 
@@ -238,9 +237,6 @@ async function handleBookingFlow(params: {
 
   const session = getSession(from);
 
-  // se dopo una prenotazione l'utente manda solo "grazie", questa funzione non viene chiamata
-  // (viene gestito prima isThanks)
-
   if (session.step === "idle") {
     session.step = "collecting";
   }
@@ -278,6 +274,8 @@ async function handleBookingFlow(params: {
   }
 
   // abbiamo tutto: salvo la prenotazione
+  const previousTime = session.time || "l'orario richiesto";
+
   try {
     const res = await fetch(`${baseUrl}/api/bookings`, {
       method: "POST",
@@ -293,6 +291,20 @@ async function handleBookingFlow(params: {
     });
 
     const data = await res.json().catch(() => null);
+
+    // caso orario occupato (409 + conflict)
+    if (res.status === 409 && data?.conflict) {
+      const niceDate = session.date
+        ? formatDateItalian(session.date)
+        : "quel giorno";
+
+      // chiedo solo un nuovo orario, mantengo servizio + data
+      session.time = undefined;
+      session.step = "collecting";
+      saveSession(from, session);
+
+      return `Per ${niceDate} alle ${previousTime} c'è già una prenotazione. Dimmi un altro orario per lo stesso giorno (es. 15:00).`;
+    }
 
     if (!res.ok || !data?.success) {
       console.error(
@@ -314,7 +326,7 @@ async function handleBookingFlow(params: {
   }
 
   const niceDate = session.date ? formatDateItalian(session.date) : "la data richiesta";
-  const timeStr = session.time || "l'orario richiesto";
+  const timeStr = session.time || previousTime;
   const serviceStr = session.service || "il servizio richiesto";
 
   session.step = "completed";
@@ -347,7 +359,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // se non abbiamo il numero WhatsApp, non possiamo gestire sessioni
   if (!from) {
     console.error("[INTERNAL-CHAT] from (numero WhatsApp) mancante nel body.");
   }
