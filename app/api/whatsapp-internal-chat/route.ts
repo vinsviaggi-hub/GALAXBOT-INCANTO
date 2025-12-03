@@ -82,6 +82,7 @@ function extractDate(text: string): string | undefined {
     return d.toISOString().slice(0, 10);
   }
 
+  // dd/mm/yyyy o dd-mm-yyyy
   const re1 = /(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})/;
   const m1 = t.match(re1);
   if (m1) {
@@ -95,6 +96,7 @@ function extractDate(text: string): string | undefined {
     }
   }
 
+  // yyyy-mm-dd
   const re2 = /(\d{4})[\/\-](\d{2})[\/\-](\d{2})/;
   const m2 = t.match(re2);
   if (m2) {
@@ -111,6 +113,7 @@ function extractDate(text: string): string | undefined {
 function extractTime(text: string): string | undefined {
   const t = text.toLowerCase();
 
+  // hh:mm o hh.mm
   const re1 = /(\d{1,2})[:\.](\d{2})/;
   const m1 = t.match(re1);
   if (m1) {
@@ -123,6 +126,7 @@ function extractTime(text: string): string | undefined {
     }
   }
 
+  // "alle 16" / "per le 9"
   const re2 = /(alle|per le)\s+(\d{1,2})\b/;
   const m2 = t.match(re2);
   if (m2) {
@@ -188,17 +192,16 @@ function formatDateItalian(dateIso: string): string {
 
 function getBaseUrl(req: NextRequest): string {
   const host =
-    req.headers.get("host") ||
-    process.env.VERCEL_URL ||
-    "localhost:3000";
+    req.headers.get("host") || process.env.VERCEL_URL || "localhost:3000";
 
-  const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
+  const isLocalhost =
+    host.includes("localhost") || host.includes("127.0.0.1");
   const protocol = isLocalhost ? "http" : "https";
 
   return `${protocol}://${host}`;
 }
 
-// --- logica prenotazione con Supabase per le sessioni ---
+// --- logica prenotazione ---
 
 async function handleBookingFlow(params: {
   req: NextRequest;
@@ -215,7 +218,7 @@ async function handleBookingFlow(params: {
 
   // se è una prenotazione nuova dopo una già completata, riparti pulito
   if (session.step === "completed") {
-    session = { step: "idle" } as BookingState;
+    session = { step: "idle", phone: session.phone };
   }
 
   if (session.step === "idle") {
@@ -254,7 +257,7 @@ async function handleBookingFlow(params: {
       case "service":
         return "Perfetto! Quale servizio vuoi prenotare? (es. taglio uomo, barba, taglio + barba)";
       case "date":
-        return 'Ottimo 👍 Per che giorno vuoi fissare l\'appuntamento? (es. domani o 28/12/2025)';
+        return "Ottimo 👍 Per che giorno vuoi fissare l'appuntamento? (es. domani o 28/12/2025)";
       case "time":
         return "Perfetto. A che ora preferisci venire? (es. 16:00 oppure alle 9)";
       case "name":
@@ -350,8 +353,19 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // flusso prenotazione: usa sempre la sessione per ricordare lo stato
-  if (from && hasBookingKeyword(lower)) {
+  // recupero la sessione per capire se una prenotazione è già in corso
+  let currentSession: BookingState | null = null;
+  if (from) {
+    currentSession = await getSessionForPhone(from);
+  }
+
+  // flusso prenotazione:
+  // - se il messaggio parla di prenotare (parole chiave)
+  // - OPPURE se siamo già in fase "collecting" per quel numero
+  if (
+    from &&
+    (hasBookingKeyword(lower) || currentSession?.step === "collecting")
+  ) {
     const reply = await handleBookingFlow({ req, input, from, waName });
     return NextResponse.json({ reply }, { status: 200 });
   }
