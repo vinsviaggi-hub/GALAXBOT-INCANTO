@@ -11,7 +11,7 @@ const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const FALLBACK_REPLY =
   "Al momento il bot non è disponibile. Riprova tra qualche minuto.";
 
-// --- utility ---
+// ----------------- UTILITY TESTO -----------------
 
 function isThanks(text: string): boolean {
   const t = text.toLowerCase();
@@ -32,17 +32,15 @@ function hasBookingKeyword(text: string): boolean {
     t.includes("appuntamenti") ||
     t.includes("fissare") ||
     t.includes("taglio") ||
-    t.includes("barba")
+    t.includes("barba") ||
+    t.includes("colore")
   );
 }
 
-// --- parsing helper ---
+// ----------------- PARSING -----------------
 
-function extractPhone(from: string, text: string): string {
-  const digitsInText = text.replace(/\D/g, "");
-  if (digitsInText.length >= 8 && digitsInText.length <= 13) {
-    return digitsInText;
-  }
+// 👉 usa sempre il numero WhatsApp, ignora numeri nel messaggio
+function extractPhone(from: string, _text: string): string {
   return from.replace(/\D/g, "") || from;
 }
 
@@ -126,7 +124,7 @@ function extractTime(text: string): string | undefined {
     }
   }
 
-  // "alle 16" / "per le 9"
+  // "alle 16", "per le 9"
   const re2 = /(alle|per le)\s+(\d{1,2})\b/;
   const m2 = t.match(re2);
   if (m2) {
@@ -139,7 +137,8 @@ function extractTime(text: string): string | undefined {
   return undefined;
 }
 
-function extractName(text: string, waName?: string): string | undefined {
+// 👉 adesso il nome viene chiesto sempre, niente fallback automatico su waName
+function extractName(text: string): string | undefined {
   const t = text.trim();
 
   const re1 = /mi chiamo\s+([a-zA-ZÀ-ÿ'\s]+)/i;
@@ -154,11 +153,10 @@ function extractName(text: string, waName?: string): string | undefined {
     return m2[1].trim();
   }
 
+  // messaggio corto tipo "Enzo"
   if (t.split(" ").length === 1 && t.length <= 20) {
     return t;
   }
-
-  if (waName && waName.length > 0) return waName;
 
   return undefined;
 }
@@ -192,7 +190,9 @@ function formatDateItalian(dateIso: string): string {
 
 function getBaseUrl(req: NextRequest): string {
   const host =
-    req.headers.get("host") || process.env.VERCEL_URL || "localhost:3000";
+    req.headers.get("host") ||
+    process.env.VERCEL_URL ||
+    "localhost:3000";
 
   const isLocalhost =
     host.includes("localhost") || host.includes("127.0.0.1");
@@ -201,54 +201,51 @@ function getBaseUrl(req: NextRequest): string {
   return `${protocol}://${host}`;
 }
 
-// --- logica prenotazione ---
+// ----------------- LOGICA PRENOTAZIONE -----------------
 
 async function handleBookingFlow(params: {
   req: NextRequest;
   input: string;
   from: string;
-  waName?: string;
 }): Promise<string> {
-  const { req, input, from, waName } = params;
+  const { req, input, from } = params;
   const baseUrl = getBaseUrl(req);
   const textLower = input.toLowerCase();
 
-  // recupera o crea sessione
   let session: BookingState = await getSessionForPhone(from);
 
-  // se è una prenotazione nuova dopo una già completata, riparti pulito
+  // se la vecchia prenotazione è chiusa e l'utente riparte, azzera
   if (session.step === "completed") {
-    session = { step: "idle", phone: session.phone };
+    session = { step: "idle" } as BookingState;
   }
 
   if (session.step === "idle") {
     session.step = "collecting";
   }
 
-  // aggiorna solo se il campo è vuoto e il testo contiene qualcosa
-  const newService = extractService(textLower);
-  if (!session.service && newService) session.service = newService;
+  // aggiorna i dati solo se mancanti
+  const s = extractService(textLower);
+  if (!session.service && s) session.service = s;
 
-  const newDate = extractDate(textLower);
-  if (!session.date && newDate) session.date = newDate;
+  const d = extractDate(textLower);
+  if (!session.date && d) session.date = d;
 
-  const newTime = extractTime(textLower);
-  if (!session.time && newTime) session.time = newTime;
+  const tm = extractTime(textLower);
+  if (!session.time && tm) session.time = tm;
 
-  const newName = extractName(input, waName);
-  if (!session.name && newName) session.name = newName;
+  const n = extractName(input);
+  if (!session.name && n) session.name = n;
 
-  const phoneParsed = extractPhone(from, input);
-  if (!session.phone && phoneParsed) session.phone = phoneParsed;
+  const ph = extractPhone(from, input);
+  if (!session.phone && ph) session.phone = ph;
 
-  // controlla cosa manca
+  // cosa manca ancora?
   const missing: Array<keyof BookingState> = [];
   if (!session.service) missing.push("service");
   if (!session.date) missing.push("date");
   if (!session.time) missing.push("time");
   if (!session.name) missing.push("name");
 
-  // se mancano dati → chiedi uno per volta
   if (missing.length > 0) {
     await saveSessionForPhone(from, session);
     const first = missing[0];
@@ -263,11 +260,11 @@ async function handleBookingFlow(params: {
       case "name":
         return "Ultima cosa: come ti chiami?";
       default:
-        return "Per completare la prenotazione ho bisogno ancora di qualche dettaglio su servizio, giorno e ora.";
+        return "Per completare la prenotazione ho bisogno ancora di qualche dettaglio su servizio, giorno, ora e nome.";
     }
   }
 
-  // se tutti i dati ci sono → salva sul foglio tramite /api/bookings
+  // abbiamo tutto → chiama /api/bookings (che controlla anche orari occupati)
   try {
     const res = await fetch(`${baseUrl}/api/bookings`, {
       method: "POST",
@@ -284,7 +281,23 @@ async function handleBookingFlow(params: {
 
     const data = await res.json().catch(() => null);
 
+    // caso orario occupato / errore dal gestionale
     if (!res.ok || !data?.success) {
+      const isConflict = Boolean(data?.conflict);
+      const conflictMsg: string =
+        typeof data?.message === "string"
+          ? data.message
+          : typeof data?.error === "string"
+          ? data.error
+          : "Per questo orario c'è già una prenotazione. Dimmi un altro orario per lo stesso giorno (es. 15:00).";
+
+      if (isConflict) {
+        // rimani in modalità collecting: l'utente deve solo cambiare orario
+        session.step = "collecting";
+        await saveSessionForPhone(from, session);
+        return conflictMsg;
+      }
+
       console.error(
         "[INTERNAL-CHAT] Errore salvataggio prenotazione:",
         res.status,
@@ -303,7 +316,7 @@ async function handleBookingFlow(params: {
     return "Ho preso nota dei tuoi dati, ma c'è stato un errore tecnico nel salvataggio. Ti ricontatteremo per confermare. ✂️";
   }
 
-  // risposta finale chiara e naturale
+  // tutto ok → messaggio finale
   const niceDate = session.date
     ? formatDateItalian(session.date)
     : "la data richiesta";
@@ -317,7 +330,7 @@ async function handleBookingFlow(params: {
   return `✅ Prenotazione registrata per ${serviceStr} il ${niceDate} alle ${timeStr}. Ti contatteremo al numero fornito per conferma. Grazie ${session.name}! 💈`;
 }
 
-// --- handler principale ---
+// ----------------- HANDLER PRINCIPALE -----------------
 
 export async function POST(req: NextRequest) {
   let body: any;
@@ -330,7 +343,7 @@ export async function POST(req: NextRequest) {
   const input = body?.input?.toString().trim() ?? "";
   const sector = body?.sector?.toString().trim() ?? "barbiere";
   const from = body?.from?.toString().trim() ?? "";
-  const waName = body?.waName?.toString().trim() ?? "";
+  const waName = body?.waName?.toString().trim() ?? ""; // ora non usato, ma lo teniamo se servirà
 
   if (!input) {
     console.error("[INTERNAL-CHAT] Nessun input nel body:", body);
@@ -342,7 +355,7 @@ export async function POST(req: NextRequest) {
 
   const lower = input.toLowerCase();
 
-  // gestione "grazie / ok" semplice
+  // 1) "grazie / ok"
   if (isThanks(lower)) {
     return NextResponse.json(
       {
@@ -353,24 +366,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // recupero la sessione per capire se una prenotazione è già in corso
-  let currentSession: BookingState | null = null;
+  // 2) flusso prenotazione: continua anche se l'utente scrive solo "domani", "alle 10", ecc.
   if (from) {
-    currentSession = await getSessionForPhone(from);
+    const session = await getSessionForPhone(from);
+
+    if (hasBookingKeyword(lower) || session.step === "collecting") {
+      const reply = await handleBookingFlow({ req, input, from });
+      return NextResponse.json({ reply }, { status: 200 });
+    }
   }
 
-  // flusso prenotazione:
-  // - se il messaggio parla di prenotare (parole chiave)
-  // - OPPURE se siamo già in fase "collecting" per quel numero
-  if (
-    from &&
-    (hasBookingKeyword(lower) || currentSession?.step === "collecting")
-  ) {
-    const reply = await handleBookingFlow({ req, input, from, waName });
-    return NextResponse.json({ reply }, { status: 200 });
-  }
-
-  // se non è una prenotazione → OpenAI per info generiche
+  // 3) info generiche → OpenAI
   if (!OPENAI_API_KEY) {
     console.error("[INTERNAL-CHAT] OPENAI_API_KEY mancante");
     return NextResponse.json({ reply: FALLBACK_REPLY }, { status: 200 });
