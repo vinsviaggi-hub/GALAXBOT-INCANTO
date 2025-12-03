@@ -1,7 +1,6 @@
-// app/lib/waSessions.ts
-import { createClient } from "@supabase/supabase-js";
+// lib/waSessions.ts
 
-// Struttura dello stato per ogni conversazione WhatsApp
+// Stato della prenotazione per WhatsApp
 export interface BookingState {
   step: "idle" | "collecting" | "completed";
   service?: string;
@@ -12,54 +11,33 @@ export interface BookingState {
   lastCompletedAt?: number;
 }
 
-// Connessione a Supabase usando le env del progetto
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey =
-  process.env.SUPABASE_SERVICE_ROLE_KEY ||
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-const supabase = createClient(supabaseUrl, supabaseKey);
-
-// Tabella che memorizza le sessioni
-const TABLE = "wa_sessions";
+// Semplice memoria in RAM per le sessioni WhatsApp
+// (va bene per demo: non richiede database o variabili ambiente)
+const sessions = new Map<string, BookingState>();
 
 /**
- * Recupera o crea una sessione per un numero WhatsApp.
+ * Recupera la sessione per un numero WhatsApp.
+ * Se non esiste, ne crea una nuova con step "idle".
  */
-export async function getSessionForPhone(phone: string): Promise<BookingState> {
-  const { data, error } = await supabase
-    .from(TABLE)
-    .select("*")
-    .eq("phone", phone)
-    .maybeSingle();
+export async function getSessionForPhone(
+  phone: string
+): Promise<BookingState> {
+  let session = sessions.get(phone);
 
-  if (error) {
-    console.error("[waSessions] Errore getSession:", error);
-    return { step: "idle" };
+  if (!session) {
+    session = { step: "idle", phone };
+    sessions.set(phone, session);
   }
 
-  if (!data) {
-    const emptyState: BookingState = { step: "idle", phone };
-    await supabase.from(TABLE).insert([{ phone, state: emptyState }]);
-    return emptyState;
-  }
-
-  try {
-    return typeof data.state === "string" ? JSON.parse(data.state) : data.state;
-  } catch {
-    return { step: "idle" };
-  }
+  return session;
 }
 
 /**
- * Salva o aggiorna la sessione per un numero.
+ * Salva/aggiorna la sessione per un numero WhatsApp.
  */
 export async function saveSessionForPhone(
   phone: string,
   state: BookingState
 ): Promise<void> {
-  const { error } = await supabase
-    .from(TABLE)
-    .upsert([{ phone, state }], { onConflict: "phone" });
-
-  if (error) console.error("[waSessions] Errore saveSession:", error);
+  sessions.set(phone, state);
 }
