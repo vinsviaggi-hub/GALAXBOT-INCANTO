@@ -1,56 +1,48 @@
 // lib/waSessions.ts
 
-// Step possibili della prenotazione
-export type BookingStep = "idle" | "collecting" | "completed";
+// Step possibili del flusso di prenotazione
+export type BookingStep =
+  | "idle"
+  | "collecting_name"
+  | "collecting_service"
+  | "collecting_date"
+  | "collecting_time"
+  | "completed";
 
 // Stato della prenotazione per un numero WhatsApp
 export interface BookingState {
   step: BookingStep;
-  service?: string | null;
-  date?: string | null;      // yyyy-mm-dd
-  time?: string | null;      // HH:mm
   name?: string | null;
-  phone?: string | null;
+  service?: string | null;
+  date?: string | null; // yyyy-mm-dd
+  time?: string | null; // HH:mm
   lastCompletedAt?: number | null;
 }
 
 // Memoria in RAM per le sessioni WhatsApp
-// Va bene per demo e per il bot di test
 const sessions = new Map<string, BookingState>();
 
-/**
- * Recupera la sessione per un numero WhatsApp.
- * Se non esiste, ne crea una nuova con step "idle".
- */
-export async function getSessionForPhone(
-  phone: string
-): Promise<BookingState> {
-  const key = phone.trim();
-  let session = sessions.get(key);
+// Recupera o crea una sessione
+export async function getSessionForPhone(phone: string): Promise<BookingState> {
+  let session = sessions.get(phone);
 
   if (!session) {
-    session = {
-      step: "idle",
-      phone: key,
-      service: null,
-      date: null,
-      time: null,
-      name: null,
-      lastCompletedAt: null,
-    };
-    sessions.set(key, session);
+    session = { step: "idle" };
+    sessions.set(phone, session);
   }
 
   return session;
 }
 
-/**
- * Salva/aggiorna la sessione per un numero WhatsApp.
- */
+// Salva/aggiorna la sessione
 export async function saveSessionForPhone(
   phone: string,
   state: BookingState
 ): Promise<void> {
-  const key = phone.trim();
-  sessions.set(key, { ...state, phone: state.phone ?? key });
+  sessions.set(phone, state);
+}
+
+// Resetta la sessione (quando completata o nuova prenotazione)
+export async function resetSessionForPhone(phone: string): Promise<void> {
+  sessions.set(phone, { step: "idle" });
 }
