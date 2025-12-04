@@ -6,12 +6,10 @@ import {
   saveSessionForPhone,
 } from "@/lib/waSessions";
 
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-
 const FALLBACK_REPLY =
   "Al momento il bot non è disponibile. Riprova tra qualche minuto.";
 
-// ----------------- UTILITY TESTO -----------------
+// --- utility ---
 
 function isThanks(text: string): boolean {
   const t = text.toLowerCase();
@@ -32,15 +30,18 @@ function hasBookingKeyword(text: string): boolean {
     t.includes("appuntamenti") ||
     t.includes("fissare") ||
     t.includes("taglio") ||
-    t.includes("barba") ||
-    t.includes("colore")
+    t.includes("barba")
   );
 }
 
-// ----------------- PARSING -----------------
+// --- parsing helper ---
 
-// 👉 usa sempre il numero WhatsApp, ignora numeri nel messaggio
-function extractPhone(from: string, _text: string): string {
+function extractPhone(from: string, text: string): string {
+  const digitsInText = text.replace(/\D/g, "");
+  if (digitsInText.length >= 8 && digitsInText.length <= 13) {
+    return digitsInText;
+  }
+  // fallback: numero WhatsApp
   return from.replace(/\D/g, "") || from;
 }
 
@@ -124,7 +125,7 @@ function extractTime(text: string): string | undefined {
     }
   }
 
-  // "alle 16", "per le 9"
+  // "alle 16" / "per le 9"
   const re2 = /(alle|per le)\s+(\d{1,2})\b/;
   const m2 = t.match(re2);
   if (m2) {
@@ -137,8 +138,7 @@ function extractTime(text: string): string | undefined {
   return undefined;
 }
 
-// 👉 adesso il nome viene chiesto sempre, niente fallback automatico su waName
-function extractName(text: string): string | undefined {
+function extractName(text: string, waName?: string): string | undefined {
   const t = text.trim();
 
   const re1 = /mi chiamo\s+([a-zA-ZÀ-ÿ'\s]+)/i;
@@ -153,10 +153,13 @@ function extractName(text: string): string | undefined {
     return m2[1].trim();
   }
 
-  // messaggio corto tipo "Enzo"
+  // se l'utente scrive solo il nome
   if (t.split(" ").length === 1 && t.length <= 20) {
     return t;
   }
+
+  // fallback: nome profilo WhatsApp
+  if (waName && waName.length > 0) return waName;
 
   return undefined;
 }
@@ -194,58 +197,63 @@ function getBaseUrl(req: NextRequest): string {
     process.env.VERCEL_URL ||
     "localhost:3000";
 
-  const isLocalhost =
-    host.includes("localhost") || host.includes("127.0.0.1");
+  const isLocalhost = host.includes("localhost") || host.includes("127.0.0.1");
   const protocol = isLocalhost ? "http" : "https";
 
   return `${protocol}://${host}`;
 }
 
-// ----------------- LOGICA PRENOTAZIONE -----------------
+// --- logica prenotazione (senza OpenAI) ---
 
 async function handleBookingFlow(params: {
   req: NextRequest;
   input: string;
   from: string;
+  waName?: string;
+  session?: BookingState;
 }): Promise<string> {
-  const { req, input, from } = params;
+  const { req, input, from, waName } = params;
   const baseUrl = getBaseUrl(req);
   const textLower = input.toLowerCase();
 
-  let session: BookingState = await getSessionForPhone(from);
+  // recupera o crea sessione
+  let session: BookingState =
+    params.session ?? (await getSessionForPhone(from));
 
-  // se la vecchia prenotazione è chiusa e l'utente riparte, azzera
+  // se c'era una prenotazione completata e l'utente chiede di nuovo di prenotare,
+  // riparti pulito
   if (session.step === "completed") {
-    session = { step: "idle" } as BookingState;
+    session = { step: "idle", phone: session.phone } as BookingState;
   }
 
   if (session.step === "idle") {
     session.step = "collecting";
   }
 
-  // aggiorna i dati solo se mancanti
-  const s = extractService(textLower);
-  if (!session.service && s) session.service = s;
+  // aggiorna solo se il campo è vuoto e il testo contiene qualcosa
+  const newService = extractService(textLower);
+  if (!session.service && newService) session.service = newService;
 
-  const d = extractDate(textLower);
-  if (!session.date && d) session.date = d;
+  const newDate = extractDate(textLower);
+  if (!session.date && newDate) session.date = newDate;
 
-  const tm = extractTime(textLower);
-  if (!session.time && tm) session.time = tm;
+  const newTime = extractTime(textLower);
+  if (!session.time && newTime) session.time = newTime;
 
-  const n = extractName(input);
-  if (!session.name && n) session.name = n;
+  const newName = extractName(input, waName);
+  if (!session.name && newName) session.name = newName;
 
-  const ph = extractPhone(from, input);
-  if (!session.phone && ph) session.phone = ph;
+  const phoneParsed = extractPhone(from, input);
+  if (!session.phone && phoneParsed) session.phone = phoneParsed;
 
-  // cosa manca ancora?
+  // cosa manca?
   const missing: Array<keyof BookingState> = [];
   if (!session.service) missing.push("service");
   if (!session.date) missing.push("date");
   if (!session.time) missing.push("time");
   if (!session.name) missing.push("name");
 
+  // se mancano dati → chiedi uno per volta
   if (missing.length > 0) {
     await saveSessionForPhone(from, session);
     const first = missing[0];
@@ -264,7 +272,7 @@ async function handleBookingFlow(params: {
     }
   }
 
-  // abbiamo tutto → chiama /api/bookings (che controlla anche orari occupati)
+  // se tutti i dati ci sono → salva sul foglio tramite /api/bookings
   try {
     const res = await fetch(`${baseUrl}/api/bookings`, {
       method: "POST",
@@ -281,21 +289,14 @@ async function handleBookingFlow(params: {
 
     const data = await res.json().catch(() => null);
 
-    // caso orario occupato / errore dal gestionale
     if (!res.ok || !data?.success) {
-      const isConflict = Boolean(data?.conflict);
-      const conflictMsg: string =
-        typeof data?.message === "string"
-          ? data.message
-          : typeof data?.error === "string"
-          ? data.error
-          : "Per questo orario c'è già una prenotazione. Dimmi un altro orario per lo stesso giorno (es. 15:00).";
-
-      if (isConflict) {
-        // rimani in modalità collecting: l'utente deve solo cambiare orario
+      // caso specifico: orario già occupato (conflict = true)
+      if (data?.conflict) {
+        // azzero solo l'orario, mantengo tutto il resto
+        session.time = undefined;
         session.step = "collecting";
         await saveSessionForPhone(from, session);
-        return conflictMsg;
+        return "Per quella data e ora c'è già una prenotazione. Scegli un altro orario (es. 16:30).";
       }
 
       console.error(
@@ -316,7 +317,7 @@ async function handleBookingFlow(params: {
     return "Ho preso nota dei tuoi dati, ma c'è stato un errore tecnico nel salvataggio. Ti ricontatteremo per confermare. ✂️";
   }
 
-  // tutto ok → messaggio finale
+  // risposta finale chiara e naturale
   const niceDate = session.date
     ? formatDateItalian(session.date)
     : "la data richiesta";
@@ -330,7 +331,46 @@ async function handleBookingFlow(params: {
   return `✅ Prenotazione registrata per ${serviceStr} il ${niceDate} alle ${timeStr}. Ti contatteremo al numero fornito per conferma. Grazie ${session.name}! 💈`;
 }
 
-// ----------------- HANDLER PRINCIPALE -----------------
+// --- risposte "fisse" senza OpenAI ---
+
+function handleGenericMessage(input: string): string {
+  const t = input.toLowerCase();
+
+  // saluti
+  if (
+    t.includes("ciao") ||
+    t.includes("buongiorno") ||
+    t.includes("buonasera") ||
+    t.includes("salve")
+  ) {
+    return "Ciao! Sono il bot del barber shop. Posso aiutarti con informazioni su servizi, orari oppure posso aiutarti a fissare un appuntamento. ✂️";
+  }
+
+  // orari
+  if (t.includes("orari") || t.includes("orario") || t.includes("aperto") || t.includes("chiuso")) {
+    return "In questa demo gli orari sono indicativi. Di solito il barbiere è aperto dal martedì al sabato, mattina e pomeriggio. Per gli orari precisi definitivi li imposteremo sul tuo bot reale. 😉";
+  }
+
+  // servizi
+  if (t.includes("servizi") || t.includes("cosa fate") || t.includes("taglio") || t.includes("barba") || t.includes("colore")) {
+    return "Offriamo servizi di taglio uomo, barba, taglio + barba e colorazione capelli. Quando vuoi, ti aiuto a fissare un appuntamento. 💈";
+  }
+
+  // prezzi
+  if (t.includes("prezzo") || t.includes("quanto costa") || t.includes("costi")) {
+    return "In questa demo non mostro i prezzi esatti. Nel bot reale possiamo inserire il listino del barbiere così il cliente li vede direttamente qui in chat. 💶";
+  }
+
+  // prenotazione generica senza parole chiave già prese
+  if (t.includes("prenota") || t.includes("prenotare") || t.includes("appuntamento")) {
+    return "Se vuoi posso aiutarti a fissare un appuntamento: dimmi che servizio ti interessa (es. taglio uomo, barba, taglio + barba).";
+  }
+
+  // fallback
+  return "Sono il bot del barber shop. Posso darti informazioni su servizi, orari oppure aiutarti a fissare un appuntamento. Scrivimi pure cosa ti serve. 😊";
+}
+
+// --- handler principale ---
 
 export async function POST(req: NextRequest) {
   let body: any;
@@ -343,7 +383,7 @@ export async function POST(req: NextRequest) {
   const input = body?.input?.toString().trim() ?? "";
   const sector = body?.sector?.toString().trim() ?? "barbiere";
   const from = body?.from?.toString().trim() ?? "";
-  const waName = body?.waName?.toString().trim() ?? ""; // ora non usato, ma lo teniamo se servirà
+  const waName = body?.waName?.toString().trim() ?? "";
 
   if (!input) {
     console.error("[INTERNAL-CHAT] Nessun input nel body:", body);
@@ -355,81 +395,43 @@ export async function POST(req: NextRequest) {
 
   const lower = input.toLowerCase();
 
-  // 1) "grazie / ok"
+  // gestione "grazie / ok"
   if (isThanks(lower)) {
+    if (from) {
+      const session = await getSessionForPhone(from);
+      if (session.step === "collecting" || session.step === "completed") {
+        return NextResponse.json(
+          {
+            reply:
+              "Prego! Se hai bisogno di altre informazioni o vuoi modificare la prenotazione, scrivimi pure. 😊",
+          },
+          { status: 200 }
+        );
+      }
+    }
+
     return NextResponse.json(
       {
         reply:
-          "Prego! Se hai bisogno di altre informazioni o vuoi modificare la prenotazione, scrivimi pure. 😊",
+          "Prego! Se ti servono informazioni su servizi, prezzi o prenotazioni, sono qui. 😊",
       },
       { status: 200 }
     );
   }
 
-  // 2) flusso prenotazione: continua anche se l'utente scrive solo "domani", "alle 10", ecc.
+  // sessione, se c'è un numero
+  let session: BookingState | undefined;
   if (from) {
-    const session = await getSessionForPhone(from);
-
-    if (hasBookingKeyword(lower) || session.step === "collecting") {
-      const reply = await handleBookingFlow({ req, input, from });
-      return NextResponse.json({ reply }, { status: 200 });
-    }
+    session = await getSessionForPhone(from);
   }
 
-  // 3) info generiche → OpenAI
-  if (!OPENAI_API_KEY) {
-    console.error("[INTERNAL-CHAT] OPENAI_API_KEY mancante");
-    return NextResponse.json({ reply: FALLBACK_REPLY }, { status: 200 });
-  }
-
-  const systemPrompt =
-    sector === "barbiere"
-      ? `
-Sei il bot WhatsApp di un barber shop.
-
-REGOLE:
-- Rispondi SEMPRE in italiano.
-- Rispondi in modo breve, chiaro e amichevole.
-- Puoi parlare di servizi (taglio, barba, colore), orari, prezzi indicativi, modalità di prenotazione in generale.
-- NON dire che registri direttamente le prenotazioni: questo lo gestisce il sistema.
-- Se l'utente chiede di prenotare, rispondi in modo gentile ma lascia che il sistema tecnico faccia le domande sui dettagli.
-`.trim()
-      : `
-Sei un assistente per un'attività locale.
-Rispondi sempre in italiano, in modo chiaro, utile e amichevole.
-`.trim();
-
-  try {
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: input },
-        ],
-        temperature: 0.4,
-      }),
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      console.error("[INTERNAL-CHAT] Errore OpenAI:", res.status, data);
-      return NextResponse.json({ reply: FALLBACK_REPLY }, { status: 200 });
-    }
-
-    const reply =
-      data?.choices?.[0]?.message?.content?.toString().trim() ||
-      FALLBACK_REPLY;
-
+  // se parliamo di prenotazioni → flusso dedicato
+  if (from && (hasBookingKeyword(lower) || session?.step === "collecting")) {
+    const reply = await handleBookingFlow({ req, input, from, waName, session });
     return NextResponse.json({ reply }, { status: 200 });
-  } catch (err) {
-    console.error("[INTERNAL-CHAT] Errore chiamando OpenAI:", err);
-    return NextResponse.json({ reply: FALLBACK_REPLY }, { status: 200 });
   }
+
+  // altrimenti risposte fisse (no OpenAI)
+  const genericReply = handleGenericMessage(input);
+  return NextResponse.json({ reply: genericReply }, { status: 200 });
 }
