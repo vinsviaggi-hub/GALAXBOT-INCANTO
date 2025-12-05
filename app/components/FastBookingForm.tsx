@@ -1,13 +1,15 @@
+// app/components/FastBookingForm.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, type FormEvent } from "react";
+import type React from "react";
 
 type Status = "idle" | "loading" | "success" | "conflict" | "error";
 
 export default function FastBookingForm() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [service, setService] = useState("Taglio uomo");
+  const [service, setService] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [notes, setNotes] = useState("");
@@ -15,12 +17,12 @@ export default function FastBookingForm() {
   const [status, setStatus] = useState<Status>("idle");
   const [message, setMessage] = useState<string>("");
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
     if (!name || !service || !date || !time) {
       setStatus("error");
-      setMessage("Compila almeno nome, servizio, data e ora.");
+      setMessage("Compila almeno nome, trattamento, data e ora.");
       return;
     }
 
@@ -44,12 +46,11 @@ export default function FastBookingForm() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data?.success) {
-        // conflitto: orario occupato
         if (res.status === 409 || data?.conflict) {
           setStatus("conflict");
           setMessage(
             data?.error ||
-              "Per questa data e ora c'è già una prenotazione. Scegli un altro orario."
+              "Questo orario non è disponibile. Scegli un altro orario libero."
           );
           return;
         }
@@ -57,19 +58,19 @@ export default function FastBookingForm() {
         setStatus("error");
         setMessage(
           data?.error ||
-            "Errore nel collegamento al foglio prenotazioni. Riprova tra poco."
+            "C'è stato un errore nel salvataggio della prenotazione. Riprova tra poco."
         );
         return;
       }
 
-      // ✅ tutto ok
       setStatus("success");
       setMessage(
-        data?.message || "Prenotazione salvata correttamente nel pannello."
+        "Prenotazione inviata correttamente! ✅ Ti ricontatteremo per confermare."
       );
 
-      // se vuoi, pulisci i campi (lasciando telefono)
-      setService("Taglio uomo");
+      // pulisco i campi
+      setName("");
+      setService("");
       setDate("");
       setTime("");
       setNotes("");
@@ -77,67 +78,79 @@ export default function FastBookingForm() {
       console.error("[FAST BOOKING] Errore:", err);
       setStatus("error");
       setMessage(
-        "Errore nel collegamento al foglio prenotazioni. Riprova tra poco."
+        "Errore nel collegamento al pannello prenotazioni. Riprova tra poco."
       );
     }
   }
 
-  // Piccolo helper per colore messaggio
-  const messageColor =
-    status === "success" ? "text-green-400" : "text-red-400";
+  const messageStyle: React.CSSProperties = {
+    marginTop: 6,
+    fontSize: 12,
+    color:
+      status === "success"
+        ? "#16a34a" // verde
+        : "#dc2626", // rosso
+  };
+
+  // layout semplice: su mobile una colonna, su desktop ci pensa il browser a allargare
+  const rowStyle: React.CSSProperties = {
+    display: "grid",
+    gridTemplateColumns: "1fr",
+    gap: 8,
+    marginBottom: 8,
+  };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit}>
       {/* Nome + Telefono */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div style={rowStyle}>
         <div>
-          <label className="block text-sm mb-1">Nome</label>
+          <label style={labelStyle}>Nome *</label>
           <input
-            className="w-full rounded-xl px-3 py-2 bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            style={inputStyle}
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Es. Luca"
+            placeholder="Es. Giulia"
           />
         </div>
         <div>
-          <label className="block text-sm mb-1">Telefono</label>
+          <label style={labelStyle}>Telefono</label>
           <input
-            className="w-full rounded-xl px-3 py-2 bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            style={inputStyle}
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
-            placeholder="Es. 393..."
+            placeholder="Es. 389 561 7880"
           />
         </div>
       </div>
 
-      {/* Servizio */}
-      <div>
-        <label className="block text-sm mb-1">Servizio</label>
+      {/* Trattamento */}
+      <div style={{ marginBottom: 8 }}>
+        <label style={labelStyle}>Trattamento desiderato *</label>
         <input
-          className="w-full rounded-xl px-3 py-2 bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          style={inputStyle}
           value={service}
           onChange={(e) => setService(e.target.value)}
-          placeholder="Es. taglio uomo"
+          placeholder="Es. trattamento viso, manicure, epilazione..."
         />
-        {/* se preferisci, qui puoi rimettere una <select> con le opzioni */}
       </div>
 
       {/* Data + Ora */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <div style={rowStyle}>
         <div>
-          <label className="block text-sm mb-1">Data</label>
+          <label style={labelStyle}>Data *</label>
           <input
             type="date"
-            className="w-full rounded-xl px-3 py-2 bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            style={inputStyle}
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
         </div>
         <div>
-          <label className="block text-sm mb-1">Ora</label>
+          <label style={labelStyle}>Ora *</label>
           <input
             type="time"
-            className="w-full rounded-xl px-3 py-2 bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+            style={inputStyle}
             value={time}
             onChange={(e) => setTime(e.target.value)}
           />
@@ -145,13 +158,13 @@ export default function FastBookingForm() {
       </div>
 
       {/* Note */}
-      <div>
-        <label className="block text-sm mb-1">Note (opzionale)</label>
+      <div style={{ marginBottom: 10 }}>
+        <label style={labelStyle}>Note (opzionale)</label>
         <input
-          className="w-full rounded-xl px-3 py-2 bg-slate-900/60 border border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-400"
+          style={inputStyle}
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
-          placeholder="Es. preferisco la macchinetta"
+          placeholder="Es. preferenze sul trattamento, zone da trattare…"
         />
       </div>
 
@@ -159,23 +172,57 @@ export default function FastBookingForm() {
       <button
         type="submit"
         disabled={status === "loading"}
-        className="w-full rounded-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-semibold py-3 transition disabled:opacity-60"
+        style={{
+          width: "100%",
+          borderRadius: 9999,
+          border: "none",
+          padding: "10px 16px",
+          fontSize: 14,
+          fontWeight: 600,
+          backgroundColor: status === "loading" ? "#fb7185" : "#f9739b",
+          color: "#ffffff",
+          cursor: status === "loading" ? "default" : "pointer",
+        }}
       >
-        {status === "loading" ? "Invio in corso..." : "Invia prenotazione"}
+        {status === "loading"
+          ? "Invio prenotazione..."
+          : "Conferma prenotazione"}
       </button>
 
-      {/* Messaggio dinamico (verde o rosso) */}
-      {message && (
-        <p className={`mt-2 text-sm ${messageColor}`}>
-          {message}
-        </p>
-      )}
+      {/* Messaggio dinamico */}
+      {message && <p style={messageStyle}>{message}</p>}
 
-      {/* Testo esplicativo fisso del demo – questo puoi lasciarlo com'è sotto */}
-      <p className="mt-2 text-xs text-slate-400">
-        Questo è solo un esempio. Nel progetto reale colleghiamo GalaxBot AI al
-        foglio del barbiere e il bot lavora sulle richieste vere dei clienti.
+      {/* Testo finale */}
+      <p
+        style={{
+          marginTop: 6,
+          fontSize: 11,
+          color: "#6b7280",
+        }}
+      >
+        Dopo l&apos;invio, il centro ti ricontatterà per confermare giorno, ora e
+        trattamento.
       </p>
     </form>
   );
 }
+
+// --- STILI BASE ---
+
+const labelStyle: React.CSSProperties = {
+  display: "block",
+  marginBottom: 4,
+  fontSize: 12,
+  fontWeight: 600,
+  color: "#4b5563",
+};
+
+const inputStyle: React.CSSProperties = {
+  width: "100%",
+  borderRadius: 10,
+  border: "1px solid #e5e7eb",
+  padding: "7px 10px",
+  fontSize: 13,
+  boxSizing: "border-box",
+  backgroundColor: "#ffffff",
+};
