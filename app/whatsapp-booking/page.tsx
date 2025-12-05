@@ -1,7 +1,7 @@
 // app/whatsapp-booking/page.tsx
 "use client";
 
-import { useState, useEffect, FormEvent } from "react";
+import { useState, useEffect, FormEvent, type CSSProperties } from "react";
 
 type FreeSlot = string;
 
@@ -100,8 +100,8 @@ export default function WhatsAppBookingPage() {
         return;
       }
 
-      // ✅ Qui mostriamo chiaramente che è andata a buon fine
-      setSuccessMessage("Prenotazione inviata correttamente! ✅");
+      // ✅ Messaggio chiaro quando va a buon fine
+      setSuccessMessage("Prenotazione confermata! ✅");
 
       // Pulisco i campi
       setName("");
@@ -388,7 +388,7 @@ export default function WhatsAppBookingPage() {
           >
             {submitting
               ? "Invio prenotazione..."
-              : "prenotazione confermata con successo"}
+              : "Conferma prenotazione"}
           </button>
         </form>
       </div>
@@ -396,7 +396,7 @@ export default function WhatsAppBookingPage() {
   );
 }
 
-const inputStyle: React.CSSProperties = {
+const inputStyle: CSSProperties = {
   width: "100%",
   borderRadius: 9999,
   border: "1px solid rgba(148,163,184,0.75)",
