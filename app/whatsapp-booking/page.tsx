@@ -1,7 +1,7 @@
 // app/whatsapp-booking/page.tsx
 "use client";
 
-import { useState, useEffect, FormEvent, type CSSProperties } from "react";
+import { useState, useEffect, FormEvent } from "react";
 
 type FreeSlot = string;
 
@@ -30,7 +30,7 @@ export default function WhatsAppBookingPage() {
     try {
       setLoadingSlots(true);
       setErrorMessage("");
-      setSuccessMessage("");
+      // ⚠️ NON cancelliamo il messaggio di successo qui
       setFreeSlots([]);
       setTime("");
 
@@ -100,17 +100,17 @@ export default function WhatsAppBookingPage() {
         return;
       }
 
-      // ✅ Prenotazione OK
+      // ✅ Messaggio chiaro quando va a buon fine
       setSuccessMessage("Prenotazione andata a buon fine! ✅");
 
-      // pulisco i campi
+      // Pulisco i campi
       setName("");
       setPhone("");
       setService("");
       setNotes("");
       setTime("");
 
-      // ricarico gli slot liberi per quella data
+      // Ricarico gli slot liberi per quella data (il messaggio rimane)
       if (date) {
         void loadAvailability(date);
       }
@@ -168,8 +168,8 @@ export default function WhatsAppBookingPage() {
             textAlign: "center",
           }}
         >
-          Compila i campi qui sotto per inviare la tua prenotazione al
-          barbiere. Vedrai solo gli orari ancora liberi per il giorno scelto.
+          Compila i campi qui sotto per inviare la tua prenotazione al barbiere.
+          Vedrai solo gli orari ancora liberi per il giorno scelto.
         </p>
 
         {/* Messaggi */}
@@ -386,9 +386,7 @@ export default function WhatsAppBookingPage() {
               cursor: submitting ? "default" : "pointer",
             }}
           >
-            {submitting
-              ? "Invio prenotazione..."
-              : "Conferma prenotazione"}
+            {submitting ? "Invio prenotazione..." : "Conferma prenotazione"}
           </button>
         </form>
       </div>
@@ -396,7 +394,7 @@ export default function WhatsAppBookingPage() {
   );
 }
 
-const inputStyle: CSSProperties = {
+const inputStyle: React.CSSProperties = {
   width: "100%",
   borderRadius: 9999,
   border: "1px solid rgba(148,163,184,0.75)",
