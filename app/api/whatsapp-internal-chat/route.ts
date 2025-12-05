@@ -2,21 +2,67 @@
 import { NextRequest, NextResponse } from "next/server";
 
 // 🔗 URL della pagina di prenotazione collegata al foglio Google
-// (quella con la tabella piccola per WhatsApp)
 const BOOKING_URL =
   "https://galaxbot-ai-site.vercel.app/whatsapp-booking";
 
-/**
- * Normalizza il testo: stringa, trim, minuscolo.
- */
+// Normalizza testo
 function normalizeText(value: unknown): string {
   if (!value) return "";
   return String(value).trim().toLowerCase();
 }
 
-/**
- * Messaggio che mandiamo quando l’utente vuole prenotare.
- */
+// Intenzioni possibili
+type Intent = "booking" | "hours" | "prices" | "thanks" | "greeting" | "other";
+
+function detectIntent(text: string): Intent {
+  const t = text.toLowerCase();
+
+  const hasBooking =
+    t.includes("prenot") ||
+    t.includes("appunt") ||
+    t.includes("fissare") ||
+    t.includes("prendere un appuntamento") ||
+    t.includes("voglio venire") ||
+    t.includes("vorrei venire") ||
+    t.includes("voglio fissare") ||
+    t.includes("prenotarmi");
+
+  const hasPrices =
+    t.includes("prezzo") ||
+    t.includes("costa") ||
+    t.includes("tariff") ||
+    t.includes("quanto") ||
+    t.includes("listino");
+
+  const hasHours =
+    t.includes("orari") ||
+    t.includes("orario") ||
+    t.includes("aperti") ||
+    t.includes("chiusi") ||
+    t.includes("quando siete aperti") ||
+    t.includes("a che ora");
+
+  const hasThanks =
+    t.includes("grazie") ||
+    t.includes("ti ringrazio") ||
+    t.includes("grazie mille");
+
+  const hasGreeting =
+    t.includes("ciao") ||
+    t.includes("buongiorno") ||
+    t.includes("buonasera") ||
+    t.includes("salve");
+
+  if (hasThanks && !hasBooking && !hasPrices && !hasHours) return "thanks";
+  if (hasBooking) return "booking";
+  if (hasPrices) return "prices";
+  if (hasHours) return "hours";
+  if (hasGreeting) return "greeting";
+  return "other";
+}
+
+// Messaggi pronti
+
 function buildBookingReply(): string {
   return [
     "Perfetto, ti aiuto subito con la prenotazione. ✂️",
@@ -24,32 +70,63 @@ function buildBookingReply(): string {
     "👉 Per scegliere giorno, orario e servizio tra gli slot liberi usa questo link:",
     BOOKING_URL,
     "",
-    "Lì puoi vedere solo gli orari disponibili e inviare la prenotazione in pochi secondi. ✅",
+    "Lì vedi solo gli orari disponibili e puoi inviare la prenotazione in pochi secondi. ✅",
   ].join("\n");
 }
 
-/**
- * Messaggio generico per info / saluto.
- */
-function buildDefaultReply(): string {
+function buildHoursReply(): string {
   return [
-    "Ciao! Sono il bot del barber shop. 💈",
+    "Gli orari di esempio del barber shop sono:",
+    "• Martedì – Venerdì: 8:30–12:30 e 15:30–20:00",
+    "• Sabato: orario continuato",
+    "• Domenica e lunedì: chiuso",
+    "",
+    "Se vuoi fissare un appuntamento ti mando il link di prenotazione:",
+    BOOKING_URL,
+  ].join("\n");
+}
+
+function buildPricesReply(): string {
+  return [
+    "Qui trovi dei prezzi indicativi di esempio:",
+    "• Taglio uomo: da 15€",
+    "• Barba: da 10€",
+    "• Taglio + barba: da 22€",
+    "",
+    "Per fissare subito un appuntamento puoi usare il link di prenotazione:",
+    BOOKING_URL,
+  ].join("\n");
+}
+
+function buildThanksReply(): string {
+  return "Prego! 😊 Se hai bisogno di altre informazioni o vuoi fissare un appuntamento, scrivimi pure.";
+}
+
+function buildGreetingReply(): string {
+  return [
+    "Ciao! 👋 Sono il bot del barber shop.",
     "Posso darti informazioni su servizi, orari e prezzi,",
     "oppure aiutarti a fissare un appuntamento.",
     "",
-    'Per prenotare scrivimi, ad esempio: "voglio prenotare" oppure "mi serve un appuntamento".',
+    'Per prenotare puoi dirmi, ad esempio: "voglio prenotare" oppure "mi serve un appuntamento".',
   ].join("\n");
 }
 
-/**
- * API chiamata dal webhook WhatsApp.
- * Deve restituire un JSON con il testo da mandare al cliente.
- */
+function buildDefaultReply(): string {
+  return [
+    "Ciao! Sono il bot del barber shop. 💈",
+    "Posso aiutarti con informazioni su servizi, orari, prezzi",
+    "oppure con la prenotazione di un appuntamento.",
+    "",
+    'Se vuoi prenotare, scrivimi per esempio: "voglio prenotare domani pomeriggio".',
+  ].join("\n");
+}
+
+// Handler principale
 export async function POST(req: NextRequest) {
   try {
     const body: any = await req.json().catch(() => null);
 
-    // Dal webhook noi passiamo: { input: text, sector, from, waName }
     const rawText: unknown =
       body?.input ??
       body?.text ??
@@ -65,28 +142,31 @@ export async function POST(req: NextRequest) {
     let reply: string;
 
     if (!text) {
-      // Nessun testo riconosciuto → messaggio di benvenuto
       reply = buildDefaultReply();
     } else {
-      // Rilevo intenzione di prenotare
-      const wantsBooking =
-        text.includes("prenot") || // prenotare, prenotazione, prenoto…
-        text.includes("appunt") || // appuntamento
-        text.includes("taglio") ||
-        text.includes("barba") ||
-        text.includes("colore") ||
-        text.includes("voglio venire") ||
-        text.includes("voglio fissare") ||
-        text.includes("vorrei venire");
+      const intent = detectIntent(text);
 
-      if (wantsBooking) {
-        reply = buildBookingReply();
-      } else {
-        reply = buildDefaultReply();
+      switch (intent) {
+        case "booking":
+          reply = buildBookingReply();
+          break;
+        case "hours":
+          reply = buildHoursReply();
+          break;
+        case "prices":
+          reply = buildPricesReply();
+          break;
+        case "thanks":
+          reply = buildThanksReply();
+          break;
+        case "greeting":
+          reply = buildGreetingReply();
+          break;
+        default:
+          reply = buildDefaultReply();
       }
     }
 
-    // Risposta nel formato che si aspetta il webhook
     return NextResponse.json(
       {
         success: true,

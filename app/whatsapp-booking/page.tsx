@@ -5,7 +5,7 @@ import { useState, useEffect, FormEvent } from "react";
 
 type FreeSlot = string;
 
-export default function WhatsappBookingPage() {
+export default function WhatsAppBookingPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [service, setService] = useState("");
@@ -16,6 +16,7 @@ export default function WhatsappBookingPage() {
   const [freeSlots, setFreeSlots] = useState<FreeSlot[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -59,7 +60,7 @@ export default function WhatsappBookingPage() {
     }
   }
 
-  const handleSubmit = async (e: FormEvent) => {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setErrorMessage("");
     setSuccessMessage("");
@@ -91,7 +92,7 @@ export default function WhatsappBookingPage() {
       if (!res.ok || !data.success) {
         if (data.conflict) {
           setErrorMessage(
-            "Questo orario è già occupato. Scegli un altro slot libero."
+            "Questo orario non è disponibile. Scegli un altro slot libero."
           );
         } else {
           setErrorMessage(data.error || "Errore durante la prenotazione.");
@@ -99,7 +100,10 @@ export default function WhatsappBookingPage() {
         return;
       }
 
-      setSuccessMessage("Prenotazione salvata correttamente! ✅");
+      // ✅ Qui mostriamo chiaramente che è andata a buon fine
+      setSuccessMessage("Prenotazione inviata correttamente! ✅");
+
+      // Pulisco i campi
       setName("");
       setPhone("");
       setService("");
@@ -118,63 +122,65 @@ export default function WhatsappBookingPage() {
     } finally {
       setSubmitting(false);
     }
-  };
+  }
 
   return (
     <main
       style={{
         minHeight: "100vh",
-        background:
-          "radial-gradient(circle at top, #020617 0, #020617 55%, #000000 100%)",
+        background: "#020617",
         display: "flex",
         justifyContent: "center",
-        alignItems: "center",
-        padding: "16px",
-        color: "#e5e7eb",
-        fontFamily:
-          "system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif",
+        alignItems: "flex-start",
+        padding: "24px 12px",
       }}
     >
       <div
         style={{
           width: "100%",
           maxWidth: 420,
+          background: "#0b1120",
           borderRadius: 20,
-          border: "1px solid rgba(148,163,184,0.4)",
-          background: "rgba(15,23,42,0.96)",
-          padding: "16px 18px 14px",
-          boxShadow: "0 22px 50px rgba(0,0,0,0.85)",
+          padding: "16px 16px 18px",
+          border: "1px solid rgba(148,163,184,0.5)",
+          boxShadow: "0 24px 60px rgba(15,23,42,0.9)",
+          color: "#e5e7eb",
+          fontFamily:
+            "system-ui, -apple-system, BlinkMacSystemFont, 'SF Pro Text', sans-serif",
         }}
       >
         <h1
           style={{
-            fontSize: "1.1rem",
-            marginBottom: 8,
+            fontSize: "1.05rem",
+            fontWeight: 600,
+            marginBottom: 6,
             color: "#f9fafb",
+            textAlign: "center",
           }}
         >
-          Prenotazione veloce 💈
+          Prenotazione veloce WhatsApp 💈
         </h1>
         <p
           style={{
-            fontSize: "0.85rem",
-            color: "#e5e7eb",
-            marginBottom: 12,
+            fontSize: "0.8rem",
+            color: "#9ca3af",
+            marginBottom: 10,
+            textAlign: "center",
           }}
         >
-          Compila questi campi e la prenotazione viene salvata nel pannello del
-          barbiere. Gli orari occupati non compaiono nella lista.
+          Compila i campi qui sotto per inviare la tua prenotazione al
+          barbiere. Vedrai solo gli orari ancora liberi per il giorno scelto.
         </p>
 
-        {/* MESSAGGI */}
+        {/* Messaggi */}
         {errorMessage && (
           <div
             style={{
-              marginBottom: 10,
+              marginBottom: 8,
               borderRadius: 8,
-              border: "1px solid rgba(248,113,113,0.6)",
-              backgroundColor: "rgba(254,242,242,0.05)",
-              padding: "8px 10px",
+              border: "1px solid rgba(248,113,113,0.8)",
+              background: "rgba(254,242,242,0.08)",
+              padding: "6px 8px",
               fontSize: "0.78rem",
               color: "#fecaca",
             }}
@@ -182,14 +188,15 @@ export default function WhatsappBookingPage() {
             {errorMessage}
           </div>
         )}
+
         {successMessage && (
           <div
             style={{
-              marginBottom: 10,
+              marginBottom: 8,
               borderRadius: 8,
-              border: "1px solid rgba(52,211,153,0.6)",
-              backgroundColor: "rgba(6,95,70,0.35)",
-              padding: "8px 10px",
+              border: "1px solid rgba(34,197,94,0.8)",
+              background: "rgba(22,163,74,0.15)",
+              padding: "6px 8px",
               fontSize: "0.78rem",
               color: "#bbf7d0",
             }}
@@ -202,9 +209,16 @@ export default function WhatsappBookingPage() {
           onSubmit={handleSubmit}
           style={{ display: "flex", flexDirection: "column", gap: 8 }}
         >
-          {/* NOME */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: "0.8rem", fontWeight: 500 }}>
+          {/* Nome */}
+          <div>
+            <label
+              style={{
+                display: "block",
+                marginBottom: 3,
+                fontSize: "0.78rem",
+                color: "#cbd5f5",
+              }}
+            >
               Nome cliente *
             </label>
             <input
@@ -216,9 +230,16 @@ export default function WhatsappBookingPage() {
             />
           </div>
 
-          {/* TELEFONO */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: "0.8rem", fontWeight: 500 }}>
+          {/* Telefono */}
+          <div>
+            <label
+              style={{
+                display: "block",
+                marginBottom: 3,
+                fontSize: "0.78rem",
+                color: "#cbd5f5",
+              }}
+            >
               Telefono
             </label>
             <input
@@ -230,9 +251,16 @@ export default function WhatsappBookingPage() {
             />
           </div>
 
-          {/* SERVIZIO */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: "0.8rem", fontWeight: 500 }}>
+          {/* Servizio */}
+          <div>
+            <label
+              style={{
+                display: "block",
+                marginBottom: 3,
+                fontSize: "0.78rem",
+                color: "#cbd5f5",
+              }}
+            >
               Servizio *
             </label>
             <input
@@ -244,9 +272,16 @@ export default function WhatsappBookingPage() {
             />
           </div>
 
-          {/* DATA */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: "0.8rem", fontWeight: 500 }}>
+          {/* Data */}
+          <div>
+            <label
+              style={{
+                display: "block",
+                marginBottom: 3,
+                fontSize: "0.78rem",
+                color: "#cbd5f5",
+              }}
+            >
               Data *
             </label>
             <input
@@ -257,27 +292,48 @@ export default function WhatsappBookingPage() {
             />
           </div>
 
-          {/* ORARIO */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: "0.8rem", fontWeight: 500 }}>
+          {/* Orario */}
+          <div>
+            <label
+              style={{
+                display: "block",
+                marginBottom: 3,
+                fontSize: "0.78rem",
+                color: "#cbd5f5",
+              }}
+            >
               Orario *
             </label>
 
-            {loadingSlots ? (
-              <div style={{ fontSize: "0.75rem", color: "#9ca3af" }}>
-                Caricamento orari disponibili...
+            {loadingSlots && (
+              <div
+                style={{
+                  fontSize: "0.75rem",
+                  color: "#9ca3af",
+                  marginBottom: 3,
+                }}
+              >
+                Caricamento orari disponibili…
               </div>
-            ) : freeSlots.length === 0 && date ? (
-              <div style={{ fontSize: "0.75rem", color: "#9ca3af" }}>
+            )}
+
+            {!loadingSlots && date && freeSlots.length === 0 && (
+              <div
+                style={{
+                  fontSize: "0.75rem",
+                  color: "#9ca3af",
+                  marginBottom: 3,
+                }}
+              >
                 Nessun orario libero per questa data.
               </div>
-            ) : null}
+            )}
 
             <select
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              disabled={loadingSlots || freeSlots.length === 0}
               style={inputStyle}
+              disabled={loadingSlots || freeSlots.length === 0}
             >
               <option value="">Seleziona un orario</option>
               {freeSlots.map((slot) => (
@@ -288,42 +344,51 @@ export default function WhatsappBookingPage() {
             </select>
           </div>
 
-          {/* NOTE */}
-          <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
-            <label style={{ fontSize: "0.8rem", fontWeight: 500 }}>
+          {/* Note */}
+          <div>
+            <label
+              style={{
+                display: "block",
+                marginBottom: 3,
+                fontSize: "0.78rem",
+                color: "#cbd5f5",
+              }}
+            >
               Note (facoltative)
             </label>
             <textarea
               rows={3}
-              placeholder="Es. Preferenze, indicazioni particolari..."
+              placeholder="Es. preferenze, indicazioni particolari…"
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               style={{
                 ...inputStyle,
-                borderRadius: 14,
+                borderRadius: 12,
                 resize: "vertical",
               }}
             />
           </div>
 
-          {/* BOTTONE */}
+          {/* Bottone */}
           <button
             type="submit"
             disabled={submitting}
             style={{
-              marginTop: 8,
+              marginTop: 6,
               width: "100%",
               borderRadius: 9999,
               border: "none",
-              padding: "10px 14px",
+              padding: "10px 16px",
               fontSize: "0.9rem",
               fontWeight: 600,
-              backgroundColor: submitting ? "#4b5563" : "#16a34a",
+              backgroundColor: submitting ? "#16a34a99" : "#16a34a",
               color: "#022c22",
               cursor: submitting ? "default" : "pointer",
             }}
           >
-            {submitting ? "Invio prenotazione..." : "Conferma prenotazione"}
+            {submitting
+              ? "Invio prenotazione..."
+              : "Conferma prenotazione"}
           </button>
         </form>
       </div>
