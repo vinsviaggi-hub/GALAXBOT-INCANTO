@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 const SCRIPT_URL = process.env.BOOKING_WEBAPP_URL || "";
 
 type BookingBody = {
+  mode?: "create" | "cancel"; // 👈 nuovo: tipo operazione (default: create)
   name?: string;
   phone?: string;
   service?: string;
@@ -39,9 +40,93 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { name, phone, service, date, time, notes } = body;
+    const {
+      mode = "create",
+      name,
+      phone,
+      service,
+      date,
+      time,
+      notes,
+    } = body;
 
-    // Controllo campi minimi
+    //
+    // 1️⃣ MODALITÀ CANCELLAZIONE PRENOTAZIONE
+    //
+    if (mode === "cancel") {
+      if (!phone || !date || !time) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "Per annullare servono telefono, data e ora della prenotazione.",
+          },
+          { status: 400 }
+        );
+      }
+
+      const payload = {
+        action: "cancel_booking",
+        phone: String(phone).trim(),
+        date: String(date).trim(),
+        time: String(time).trim(),
+      };
+
+      const gsRes = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await gsRes.text();
+      let data: any;
+
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        console.error(
+          "[BOOKINGS CANCEL] Risposta NON JSON da Apps Script:",
+          text
+        );
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Errore nel collegamento al foglio prenotazioni.",
+          },
+          { status: 502 }
+        );
+      }
+
+      if (!gsRes.ok || !data?.success) {
+        const errorMessage: string =
+          data?.error ||
+          data?.message ||
+          "Non è stato possibile annullare la prenotazione.";
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: errorMessage,
+          },
+          { status: 400 }
+        );
+      }
+
+      // ✅ Annullamento ok
+      return NextResponse.json(
+        {
+          success: true,
+          rowNumber: data.rowNumber ?? null,
+          message:
+            data.message || "Prenotazione annullata correttamente dal pannello.",
+        },
+        { status: 200 }
+      );
+    }
+
+    //
+    // 2️⃣ MODALITÀ CREAZIONE PRENOTAZIONE (come avevi prima)
+    //
     if (!name || !service || !date || !time) {
       return NextResponse.json(
         {
@@ -68,7 +153,6 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
-      // niente cache, siamo su server
     });
 
     const text = await gsRes.text();
@@ -77,7 +161,7 @@ export async function POST(req: NextRequest) {
     try {
       data = JSON.parse(text);
     } catch (err) {
-      console.error("[BOOKINGS] Risposta NON JSON da Apps Script:", text);
+      console.error("[BOOKINGS CREATE] Risposta NON JSON da Apps Script:", text);
       return NextResponse.json(
         {
           success: false,
@@ -105,7 +189,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ✅ Tutto ok
+    // ✅ Tutto ok (creazione)
     return NextResponse.json(
       {
         success: true,

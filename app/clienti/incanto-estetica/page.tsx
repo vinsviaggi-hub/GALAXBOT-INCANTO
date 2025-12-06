@@ -1,14 +1,15 @@
-// app/page.tsx
+// app/clienti/incanto-estetica/page.tsx
 import ChatBox from "@/app/components/chatbox";
 import FastBookingForm from "@/app/components/FastBookingForm";
+import CancelBookingForm from "@/app/components/CancelBookingForm";
 
-// Versione Incanto stabile - forzo nuovo deploy, nessuna modifica grafica
-export default function Home() {
+export default function IncantoEsteticaPage() {
   return (
     <main
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(to bottom right, #fde2e4, #f9d5ec, #f8f0fa)",
+        background:
+          "linear-gradient(to bottom right, #fde2e4, #f9d5ec, #f8f0fa)",
         fontFamily: "'Inter', system-ui, sans-serif",
         color: "#3d0a27",
         padding: "24px 12px",
@@ -57,8 +58,8 @@ export default function Home() {
               lineHeight: 1.5,
             }}
           >
-            Un assistente virtuale che accoglie le clienti, risponde 24/7 e gestisce le
-            prenotazioni con semplicità ed eleganza.
+            Un assistente virtuale che accoglie le clienti, risponde 24/7 e
+            gestisce le prenotazioni con semplicità ed eleganza.
           </p>
         </header>
 
@@ -90,9 +91,15 @@ export default function Home() {
             }}
           >
             <li>Centro estetico &amp; nail art</li>
-            <li>Via Strada Statale 150, n°114 – Pianura di Guardia Vomano</li>
+            <li>
+              Via Strada Statale 150, n°114 – Pianura di Guardia Vomano
+              (Notaresco)
+            </li>
             <li>Telefono: 389 561 7880</li>
-            <li>Trattamenti viso, corpo, unghie, epilazione e percorsi personalizzati</li>
+            <li>
+              Trattamenti viso, corpo, unghie, epilazione e percorsi
+              personalizzati
+            </li>
           </ul>
         </section>
 
@@ -115,6 +122,16 @@ export default function Home() {
           >
             Chat assistente virtuale 💬
           </h2>
+          <p
+            style={{
+              fontSize: "0.9rem",
+              color: "#5b0f3a",
+              marginBottom: 8,
+            }}
+          >
+            Fai una domanda come farebbe una cliente: trattamenti, tempi,
+            consigli di bellezza, promozioni…
+          </p>
           <ChatBox sector="estetica" />
         </section>
 
@@ -169,6 +186,38 @@ export default function Home() {
             Prenotazione veloce ✨
           </h2>
           <FastBookingForm />
+        </section>
+
+        {/* ANNULLA PRENOTAZIONE */}
+        <section
+          style={{
+            background: "rgba(255,255,255,0.85)",
+            borderRadius: 16,
+            padding: "16px 20px",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.05)",
+          }}
+        >
+          <h2
+            style={{
+              fontSize: "1rem",
+              fontWeight: 600,
+              marginBottom: 6,
+              color: "#8b006b",
+            }}
+          >
+            Annulla prenotazione 📅
+          </h2>
+          <p
+            style={{
+              fontSize: "0.9rem",
+              color: "#5b0f3a",
+              marginBottom: 8,
+            }}
+          >
+            Se hai già un appuntamento e non puoi venire, inserisci i dati qui
+            sotto per annullare la prenotazione.
+          </p>
+          <CancelBookingForm />
         </section>
       </div>
     </main>
