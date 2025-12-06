@@ -1,17 +1,9 @@
 // app/components/FastBookingForm.tsx
 "use client";
 
-import React, { useState, type FormEvent } from "react";
+import React, { useState, type FormEvent, type CSSProperties } from "react";
 
 type Status = "idle" | "loading" | "success" | "conflict" | "error";
-
-const OPEN_TIME = "08:00";
-const CLOSE_TIME = "19:00";
-
-function isTimeInRange(time: string) {
-  // Confronto stringhe nel formato HH:MM funziona bene
-  return time >= OPEN_TIME && time <= CLOSE_TIME;
-}
 
 export default function FastBookingForm() {
   const [name, setName] = useState("");
@@ -29,22 +21,44 @@ export default function FastBookingForm() {
     setMessage("");
   }
 
+  // converte "HH:MM" in minuti
+  function timeToMinutes(t: string): number | null {
+    if (!t || t.length < 4) return null;
+    const [h, m] = t.split(":").map((x) => parseInt(x, 10));
+    if (Number.isNaN(h) || Number.isNaN(m)) return null;
+    return h * 60 + m;
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     resetMessages();
 
-    // Campi obbligatori
     if (!name || !phone || !service || !date || !time) {
       setStatus("error");
       setMessage("Compila tutti i campi obbligatori contrassegnati con *.");
       return;
     }
 
-    // Orario entro fascia 08:00–19:00
-    if (!isTimeInRange(time)) {
+    // ✅ Controllo fasce orarie: 08:00–13:00 oppure 15:00–19:00
+    const minutes = timeToMinutes(time);
+    if (minutes === null) {
+      setStatus("error");
+      setMessage("Inserisci un orario valido.");
+      return;
+    }
+
+    const fromMorning = 8 * 60;
+    const toMorning = 13 * 60;
+    const fromAfternoon = 15 * 60;
+    const toAfternoon = 19 * 60;
+
+    const inMorning = minutes >= fromMorning && minutes <= toMorning;
+    const inAfternoon = minutes >= fromAfternoon && minutes <= toAfternoon;
+
+    if (!inMorning && !inAfternoon) {
       setStatus("error");
       setMessage(
-        "Gli orari prenotabili sono tra 08:00 e 19:00. Scegli un orario in questo intervallo."
+        "Gli orari prenotabili sono 8:00–13:00 e 15:00–19:00, come indicato nella sezione Orari di apertura."
       );
       return;
     }
@@ -68,7 +82,6 @@ export default function FastBookingForm() {
       const data = await res.json().catch(() => null);
 
       if (!res.ok || !data?.success) {
-        // Orario già occupato
         if (res.status === 409 || data?.conflict) {
           setStatus("conflict");
           setMessage(
@@ -93,7 +106,7 @@ export default function FastBookingForm() {
           "Prenotazione inviata con successo! Ti ricontatteremo per confermare l'appuntamento. 💅"
       );
 
-      // Pulisci i campi
+      // Pulisco i campi
       setName("");
       setPhone("");
       setService("");
@@ -109,7 +122,7 @@ export default function FastBookingForm() {
     }
   }
 
-  const cardStyle: React.CSSProperties = {
+  const cardStyle: CSSProperties = {
     backgroundColor: "#ffe4f2",
     borderRadius: 18,
     padding: "16px 18px 18px",
@@ -118,7 +131,7 @@ export default function FastBookingForm() {
     color: "#4b5563",
   };
 
-  const labelStyle: React.CSSProperties = {
+  const labelStyle: CSSProperties = {
     display: "block",
     fontSize: "0.78rem",
     marginBottom: 4,
@@ -126,7 +139,7 @@ export default function FastBookingForm() {
     fontWeight: 600,
   };
 
-  const inputStyle: React.CSSProperties = {
+  const inputStyle: CSSProperties = {
     width: "100%",
     borderRadius: 9999,
     border: "1px solid rgba(248,113,181,0.6)",
@@ -137,26 +150,26 @@ export default function FastBookingForm() {
     outline: "none",
   };
 
-  const textareaStyle: React.CSSProperties = {
+  const textareaStyle: CSSProperties = {
     ...inputStyle,
     borderRadius: 14,
     resize: "vertical",
     minHeight: 70,
   };
 
-  const helperStyle: React.CSSProperties = {
+  const helperStyle: CSSProperties = {
     fontSize: "0.8rem",
     color: "#6b7280",
     marginBottom: 10,
   };
 
-  const errorTextStyle: React.CSSProperties = {
+  const errorTextStyle: CSSProperties = {
     fontSize: "0.8rem",
     color: "#b91c1c",
     marginTop: 8,
   };
 
-  const successTextStyle: React.CSSProperties = {
+  const successTextStyle: CSSProperties = {
     fontSize: "0.8rem",
     color: "#15803d",
     marginTop: 8,
@@ -262,8 +275,8 @@ export default function FastBookingForm() {
               type="time"
               style={inputStyle}
               value={time}
-              min={OPEN_TIME}
-              max={CLOSE_TIME}
+              min="08:00"
+              max="19:00"
               step={900} // 15 minuti
               onChange={(e) => {
                 resetMessages();

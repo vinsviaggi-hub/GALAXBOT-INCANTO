@@ -1,22 +1,32 @@
 // app/api/bookings/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-// 👉 Web App URL di Google Apps Script (quella che finisce con /exec)
-// ⚠️ QUESTA È QUELLA NUOVA DI INCANTO
-const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxGJlDzOXRRHJ1DUgpLyQ40cpvaKML1lfXJZQs0eFLHniLqWXJjosL2gs3GKP6RBr-H/exec";
+// URL della Web App di Google Script, letto da variabile ambiente Vercel
+const SCRIPT_URL = process.env.BOOKING_WEBAPP_URL || "";
 
 type BookingBody = {
   name?: string;
   phone?: string;
   service?: string;
-  date?: string; // formato YYYY-MM-DD
-  time?: string; // formato HH:MM
+  date?: string; // YYYY-MM-DD
+  time?: string; // HH:MM
   notes?: string;
 };
 
 export async function POST(req: NextRequest) {
   try {
+    if (!SCRIPT_URL) {
+      console.error("[BOOKINGS] BOOKING_WEBAPP_URL non impostata");
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Configurazione mancante: contatta l'amministratore del sito.",
+        },
+        { status: 500 }
+      );
+    }
+
     const body = (await req.json().catch(() => null)) as BookingBody | null;
 
     if (!body || typeof body !== "object") {
@@ -31,13 +41,13 @@ export async function POST(req: NextRequest) {
 
     const { name, phone, service, date, time, notes } = body;
 
-    // 🔎 Controllo campi minimi
+    // Controllo campi minimi
     if (!name || !service || !date || !time) {
       return NextResponse.json(
         {
           success: false,
           error:
-            "Per prenotare servono almeno nome, servizio, data e ora.",
+            "Per prenotare servono almeno nome, trattamento, data e ora.",
         },
         { status: 400 }
       );
@@ -58,15 +68,15 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
+      // niente cache, siamo su server
     });
 
-    // Leggiamo come testo e poi proviamo a fare JSON.parse
     const text = await gsRes.text();
     let data: any;
 
     try {
       data = JSON.parse(text);
-    } catch {
+    } catch (err) {
       console.error("[BOOKINGS] Risposta NON JSON da Apps Script:", text);
       return NextResponse.json(
         {
@@ -77,8 +87,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Se Apps Script ha dato errore (es. orario occupato)
-    if (!gsRes.ok || !data.success) {
+    if (!gsRes.ok || !data?.success) {
       const errorMessage: string =
         data?.error ||
         data?.message ||
@@ -101,7 +110,9 @@ export async function POST(req: NextRequest) {
       {
         success: true,
         rowNumber: data.rowNumber ?? null,
-        message: data.message ?? "Prenotazione salvata correttamente.",
+        message:
+          data.message ||
+          "Prenotazione salvata correttamente nel pannello Incanto.",
       },
       { status: 200 }
     );
