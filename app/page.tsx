@@ -10,17 +10,20 @@ import ChatBox from "./components/chatbox";
 
 type Status = "idle" | "loading" | "success" | "conflict" | "error";
 
-/**
- * Converte "HH:MM" in minuti (per controllare le fasce orarie)
- */
-function timeToMinutes(t: string): number | null {
-  if (!t || t.length < 4) return null;
-  const [h, m] = t.split(":").map((x) => parseInt(x, 10));
-  if (Number.isNaN(h) || Number.isNaN(m)) return null;
-  return h * 60 + m;
-}
+// Slot orari validi: 08:00–13:00 e 15:00–19:00 ogni 15 minuti
+const TIME_SLOTS: string[] = [
+  "08:00","08:15","08:30","08:45",
+  "09:00","09:15","09:30","09:45",
+  "10:00","10:15","10:30","10:45",
+  "11:00","11:15","11:30","11:45",
+  "12:00","12:15","12:30","12:45",
+  "15:00","15:15","15:30","15:45",
+  "16:00","16:15","16:30","16:45",
+  "17:00","17:15","17:30","17:45",
+  "18:00","18:15","18:30","18:45",
+];
 
-// 🔹 Sezione prenotazione veloce – stessa grafica, ma collegata a /api/bookings
+// 🔹 Sezione prenotazione veloce – collegata a /api/bookings
 function FastBookingSection() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -47,23 +50,8 @@ function FastBookingSection() {
       return;
     }
 
-    // ✅ Controllo fasce orarie: 08:00–13:00 oppure 15:00–19:00
-    const minutes = timeToMinutes(time);
-    if (minutes === null) {
-      setStatus("error");
-      setMessage("Inserisci un orario valido.");
-      return;
-    }
-
-    const fromMorning = 8 * 60;
-    const toMorning = 13 * 60;
-    const fromAfternoon = 15 * 60;
-    const toAfternoon = 19 * 60;
-
-    const inMorning = minutes >= fromMorning && minutes <= toMorning;
-    const inAfternoon = minutes >= fromAfternoon && minutes <= toAfternoon;
-
-    if (!inMorning && !inAfternoon) {
+    // ✅ Controllo che l'orario sia tra quelli consentiti
+    if (!TIME_SLOTS.includes(time)) {
       setStatus("error");
       setMessage(
         "Gli orari prenotabili sono 8:00–13:00 e 15:00–19:00, come indicato nella sezione Orari di apertura."
@@ -211,18 +199,25 @@ function FastBookingSection() {
 
           <label style={{ ...labelStyle, flex: 1, minWidth: 140 }}>
             Ora <span style={{ color: "#b91c1c" }}>*</span>
-            <input
-              type="time"
+            {/* SELECT con soli orari validi */}
+            <select
               value={time}
-              min="08:00"
-              max="19:00"
-              step={900} // 15 minuti
               onChange={(e) => {
                 resetMessages();
                 setTime(e.target.value);
               }}
-              style={inputStyle}
-            />
+              style={{
+                ...inputStyle,
+                paddingRight: "28px",
+              }}
+            >
+              <option value="">Seleziona un orario</option>
+              {TIME_SLOTS.map((slot) => (
+                <option key={slot} value={slot}>
+                  {slot}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
 
