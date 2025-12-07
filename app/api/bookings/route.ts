@@ -1,6 +1,10 @@
+// app/api/bookings/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-const SCRIPT_URL = process.env.BOOKING_WEBAPP_URL || "";
+// 🔗 Web App URL di Google Apps Script per
+// "GalaxBot - Idee per la Testa" (BARBIERE)
+const SCRIPT_URL =
+  "https://script.google.com/macros/s/AKfycbxZrsGAlCw9fweBfAqYTZ-scfEcvR_fpEvD094znv0Q0oDAxAcFxxvu21j8OG3nUQk/exec";
 
 type BookingBody = {
   action?: "create_booking" | "cancel_booking";
@@ -15,12 +19,12 @@ type BookingBody = {
 export async function POST(req: NextRequest) {
   try {
     if (!SCRIPT_URL) {
-      console.error("[BOOKINGS] BOOKING_WEBAPP_URL non impostata");
+      console.error("[BOOKINGS] SCRIPT_URL non impostata");
       return NextResponse.json(
         {
           success: false,
           error:
-            "Configurazione mancante: contatta l'amministratore del sito.",
+            "Configurazione mancante del pannello prenotazioni. Contatta l'amministratore del sito.",
         },
         { status: 500 }
       );
@@ -48,7 +52,7 @@ export async function POST(req: NextRequest) {
       notes,
     } = body;
 
-    // VALIDAZIONI
+    // ✅ VALIDAZIONI BASE
     if (action === "create_booking") {
       if (!name || !service || !date || !time) {
         return NextResponse.json(
@@ -83,6 +87,7 @@ export async function POST(req: NextRequest) {
       notes: notes ? String(notes).trim() : "",
     };
 
+    // 🔄 CHIAMATA ALLO SCRIPT GOOGLE
     const gsRes = await fetch(SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -105,14 +110,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // ❌ ERRORE DALLO SCRIPT
     if (!gsRes.ok || !data?.success) {
       const errorMessage: string =
         data?.error ||
         data?.message ||
         "Operazione non riuscita sul foglio prenotazioni.";
 
-      // Distingo i casi particolari
       if (data?.conflict) {
+        // slot già occupato
         return NextResponse.json(
           {
             success: false,
@@ -124,6 +130,7 @@ export async function POST(req: NextRequest) {
       }
 
       if (data?.notFound) {
+        // prenotazione non trovata per annullamento
         return NextResponse.json(
           {
             success: false,
@@ -143,7 +150,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ✅ Tutto ok
+    // ✅ TUTTO OK
     return NextResponse.json(
       {
         success: true,
@@ -153,8 +160,8 @@ export async function POST(req: NextRequest) {
         message:
           data.message ||
           (action === "cancel_booking"
-            ? "Prenotazione annullata correttamente."
-            : "Prenotazione salvata correttamente nel pannello Incanto."),
+            ? "Prenotazione annullata correttamente. Lo slot è stato liberato."
+            : "Prenotazione salvata correttamente nel pannello Idee per la Testa."),
       },
       { status: 200 }
     );

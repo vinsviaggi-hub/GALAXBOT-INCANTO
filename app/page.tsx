@@ -11,17 +11,24 @@ import CancelBookingForm from "./components/CancelBookingForm";
 
 type Status = "idle" | "loading" | "success" | "conflict" | "error";
 
-// Slot orari validi: 08:00–13:00 e 15:00–19:00 ogni 15 minuti
+/**
+ * Slot orari validi per IDEE PER LA TESTA:
+ *  - Mattina 8:30–12:30
+ *  - Pomeriggio 15:00–20:00
+ *  ogni 15 minuti
+ */
 const TIME_SLOTS: string[] = [
-  "08:00", "08:15", "08:30", "08:45",
+  "08:30", "08:45",
   "09:00", "09:15", "09:30", "09:45",
   "10:00", "10:15", "10:30", "10:45",
   "11:00", "11:15", "11:30", "11:45",
-  "12:00", "12:15", "12:30", "12:45",
+  "12:00", "12:15", "12:30",
   "15:00", "15:15", "15:30", "15:45",
   "16:00", "16:15", "16:30", "16:45",
   "17:00", "17:15", "17:30", "17:45",
   "18:00", "18:15", "18:30", "18:45",
+  "19:00", "19:15", "19:30", "19:45",
+  "20:00",
 ];
 
 // 🔹 Sezione prenotazione veloce – collegata a /api/bookings
@@ -55,7 +62,7 @@ function FastBookingSection() {
     if (!TIME_SLOTS.includes(time)) {
       setStatus("error");
       setMessage(
-        "Gli orari prenotabili sono 8:00–13:00 e 15:00–19:00, come indicato nella sezione Orari di apertura."
+        "Gli orari prenotabili sono 8:30–12:30 e 15:00–20:00, come indicato nella sezione Orari di apertura."
       );
       return;
     }
@@ -100,7 +107,7 @@ function FastBookingSection() {
       setStatus("success");
       setMessage(
         data?.message ||
-          "Prenotazione inviata con successo! Ti ricontatteremo per confermare l'appuntamento. 💅"
+          "Prenotazione inviata con successo! Ti ricontatteremo per confermare l'appuntamento. ✂️"
       );
 
       // Pulisco i campi
@@ -124,13 +131,13 @@ function FastBookingSection() {
       <h2 style={sectionTitleStyle}>Prenotazione veloce ✨</h2>
       <p
         style={{
-          fontSize: "0.85rem",
-          color: "#6b7280",
+          fontSize: "0.9rem",
+          color: "#e5e7eb",
           marginBottom: 12,
         }}
       >
-        Richiedi un appuntamento indicando i dati principali. Ti
-        ricontatteremo per confermare giorno e orario.
+        Richiedi un appuntamento indicando i dati principali. Ti ricontatteremo
+        per confermare giorno e orario.
       </p>
 
       <form
@@ -139,10 +146,10 @@ function FastBookingSection() {
       >
         {/* Nome */}
         <label style={labelStyle}>
-          Nome <span style={{ color: "#b91c1c" }}>*</span>
+          Nome <span style={{ color: "#f97373" }}>*</span>
           <input
             type="text"
-            placeholder="Es. Aurora"
+            placeholder="Es. Marco"
             value={name}
             onChange={(e) => {
               resetMessages();
@@ -154,10 +161,10 @@ function FastBookingSection() {
 
         {/* Telefono */}
         <label style={labelStyle}>
-          Telefono <span style={{ color: "#b91c1c" }}>*</span>
+          Telefono <span style={{ color: "#f97373" }}>*</span>
           <input
             type="tel"
-            placeholder="Es. 389 561 7880"
+            placeholder="Es. 333 123 4567"
             value={phone}
             onChange={(e) => {
               resetMessages();
@@ -167,13 +174,12 @@ function FastBookingSection() {
           />
         </label>
 
-        {/* Trattamento */}
+        {/* Servizio */}
         <label style={labelStyle}>
-          Trattamento desiderato{" "}
-          <span style={{ color: "#b91c1c" }}>*</span>
+          Servizio richiesto <span style={{ color: "#f97373" }}>*</span>
           <input
             type="text"
-            placeholder="Es. trattamento viso, manicure, epilazione..."
+            placeholder="Es. taglio uomo, barba, sfumatura, bimbo..."
             value={service}
             onChange={(e) => {
               resetMessages();
@@ -186,7 +192,7 @@ function FastBookingSection() {
         {/* Data + Ora */}
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <label style={{ ...labelStyle, flex: 1, minWidth: 140 }}>
-            Data <span style={{ color: "#b91c1c" }}>*</span>
+            Data <span style={{ color: "#f97373" }}>*</span>
             <input
               type="date"
               value={date}
@@ -199,8 +205,7 @@ function FastBookingSection() {
           </label>
 
           <label style={{ ...labelStyle, flex: 1, minWidth: 140 }}>
-            Ora <span style={{ color: "#b91c1c" }}>*</span>
-            {/* SELECT con soli orari validi */}
+            Ora <span style={{ color: "#f97373" }}>*</span>
             <select
               value={time}
               onChange={(e) => {
@@ -227,7 +232,7 @@ function FastBookingSection() {
           Note (facoltative)
           <textarea
             rows={3}
-            placeholder="Es. preferisco il mattino, pelle sensibile, trattamento rilassante..."
+            placeholder="Es. preferisco il pomeriggio, vengo con un bimbo, ecc..."
             value={notes}
             onChange={(e) => {
               resetMessages();
@@ -235,8 +240,9 @@ function FastBookingSection() {
             }}
             style={{
               ...inputStyle,
-              borderRadius: 12,
+              borderRadius: 14,
               resize: "vertical",
+              minHeight: 70,
             }}
           />
         </label>
@@ -252,12 +258,16 @@ function FastBookingSection() {
             padding: "10px 16px",
             fontSize: "0.95rem",
             fontWeight: 600,
-            backgroundColor: status === "loading" ? "#f97373" : "#db2777",
+            background:
+              status === "loading"
+                ? "linear-gradient(90deg,#f97373,#f97373)"
+                : "linear-gradient(90deg,#ef4444,#2563eb)",
             color: "#fff",
             cursor: status === "loading" ? "default" : "pointer",
+            boxShadow: "0 14px 30px rgba(15,23,42,0.9)",
           }}
         >
-          {status === "loading" ? "Invio in corso…" : "Invia richiesta 💅"}
+          {status === "loading" ? "Invio in corso…" : "Invia richiesta ✂️"}
         </button>
 
         {/* Messaggi dinamici */}
@@ -265,8 +275,8 @@ function FastBookingSection() {
           <p
             style={{
               marginTop: 10,
-              fontSize: "0.8rem",
-              color: "#b91c1c",
+              fontSize: "0.85rem",
+              color: "#fecaca",
             }}
           >
             {message}
@@ -277,8 +287,8 @@ function FastBookingSection() {
           <p
             style={{
               marginTop: 10,
-              fontSize: "0.8rem",
-              color: "#15803d",
+              fontSize: "0.85rem",
+              color: "#bbf7d0",
             }}
           >
             {message}
@@ -289,20 +299,22 @@ function FastBookingSection() {
   );
 }
 
-export default function IncantoPage() {
+export default function BarberPage() {
   return (
     <main
       style={{
         minHeight: "100vh",
-        background: "linear-gradient(to bottom, #fdf2f8, #fce7f3)",
-        padding: "32px 12px 40px",
+        padding: "28px 12px 40px",
         fontFamily:
           "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        background:
+          "radial-gradient(circle at top, rgba(37,99,235,0.35), transparent 55%), linear-gradient(to bottom, #020617, #020617 35%, #020617 100%)",
+        color: "#e5e7eb",
       }}
     >
       <div
         style={{
-          maxWidth: 960,
+          maxWidth: 980,
           margin: "0 auto",
         }}
       >
@@ -310,35 +322,45 @@ export default function IncantoPage() {
         <header style={{ textAlign: "center", marginBottom: 24 }}>
           <div
             style={{
-              fontSize: "0.75rem",
-              textTransform: "uppercase",
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "4px 10px",
+              borderRadius: 9999,
+              background:
+                "linear-gradient(90deg,#ef4444,#ffffff,#2563eb,#ef4444)",
+              fontSize: "0.7rem",
+              fontWeight: 700,
               letterSpacing: "0.18em",
-              color: "#9d174d",
-              marginBottom: 4,
+              textTransform: "uppercase",
+              color: "#0f172a",
             }}
           >
-            GalaxBot AI · Centro estetico
+            GalaxBot AI · Barber Shop
           </div>
+
           <h1
             style={{
-              fontSize: "1.7rem",
-              fontWeight: 700,
-              color: "#4a044e",
+              fontSize: "1.9rem",
+              fontWeight: 800,
+              color: "#f9fafb",
+              marginTop: 10,
               marginBottom: 6,
             }}
           >
-            Incanto di Aurora D&apos;Ignazio
+            Idee per la Testa 💈
           </h1>
+
           <p
             style={{
-              fontSize: "0.9rem",
-              color: "#6b7280",
-              maxWidth: 520,
+              fontSize: "0.95rem",
+              color: "#cbd5f5",
+              maxWidth: 560,
               margin: "0 auto",
             }}
           >
-            Un assistente virtuale che accoglie le clienti, risponde 24/7 e
-            gestisce le prenotazioni con semplicità ed eleganza.
+            Un assistente virtuale che gestisce richieste, prenotazioni e
+            cancellazioni per il tuo barber shop, 24 ore su 24.
           </p>
         </header>
 
@@ -350,17 +372,14 @@ export default function IncantoPage() {
               margin: 0,
               paddingLeft: "1.2rem",
               fontSize: "0.9rem",
-              color: "#374151",
+              color: "#e5e7eb",
               lineHeight: 1.6,
             }}
           >
-            <li>Centro estetico &amp; nail art</li>
-            <li>Via Strada Statale 150, n°114 – Pianura di Guardia Vomano</li>
-            <li>Telefono: 389 561 7880</li>
-            <li>
-              Trattamenti viso, corpo, unghie, epilazione e percorsi
-              personalizzati.
-            </li>
+            <li>Barber Shop uomo</li>
+            <li>Castelnuovo Vomano (TE)</li>
+            <li>Servizi: taglio, barba, sfumature, styling, bimbi…</li>
+            <li>Telefono: 333 123 4567</li>
           </ul>
         </section>
 
@@ -369,16 +388,16 @@ export default function IncantoPage() {
           <h2 style={sectionTitleStyle}>Chat assistente virtuale 💬</h2>
           <p
             style={{
-              fontSize: "0.85rem",
-              color: "#6b7280",
+              fontSize: "0.9rem",
+              color: "#e5e7eb",
               marginBottom: 8,
             }}
           >
-            Fai una domanda come farebbe una cliente: trattamenti, tempi,
-            consigli di bellezza, promozioni…
+            Fai una domanda come farebbe un cliente: orari, disponibilità, servizi,
+            tempi per taglio o barba…
           </p>
 
-          <ChatBox sector="estetica" />
+          <ChatBox sector="barbiere" />
         </section>
 
         {/* Orari */}
@@ -389,11 +408,11 @@ export default function IncantoPage() {
               margin: 0,
               paddingLeft: "1.2rem",
               fontSize: "0.9rem",
-              color: "#374151",
+              color: "#e5e7eb",
               lineHeight: 1.6,
             }}
           >
-            <li>Lunedì–Sabato: 8:00–13:00 e 15:00–19:00</li>
+            <li>Lunedì–Sabato: 8:30–12:30 e 15:00–20:00</li>
             <li>Domenica: chiuso</li>
           </ul>
         </section>
@@ -401,14 +420,23 @@ export default function IncantoPage() {
         {/* Prenotazione veloce */}
         <FastBookingSection />
 
-        {/* Annulla prenotazione */}
-        <section style={cardStyle}>
-          <h2 style={sectionTitleStyle}>Annulla prenotazione ❌</h2>
+        {/* Annulla prenotazione – lascio la grafica del componente così com'è */}
+        <section style={{ marginTop: 4 }}>
+          <h2
+            style={{
+              fontSize: "1.05rem",
+              fontWeight: 700,
+              color: "#f97373",
+              margin: "10px 0 8px",
+            }}
+          >
+            Annulla prenotazione ❌
+          </h2>
           <p
             style={{
-              fontSize: "0.85rem",
-              color: "#6b7280",
-              marginBottom: 12,
+              fontSize: "0.9rem",
+              color: "#e5e7eb",
+              marginBottom: 10,
             }}
           >
             Non puoi più venire all&apos;appuntamento? Inserisci i dati della
@@ -426,24 +454,25 @@ export default function IncantoPage() {
 // ---------- STILI BASE ----------
 
 const cardStyle: CSSProperties = {
-  backgroundColor: "#fdf2f8",
-  borderRadius: 16,
-  padding: "14px 18px 16px",
-  marginBottom: 16,
-  border: "1px solid #f9a8d4",
-  boxShadow: "0 8px 24px rgba(244, 114, 182, 0.15)",
+  background:
+    "linear-gradient(135deg, rgba(15,23,42,0.98), rgba(30,64,175,0.92))",
+  borderRadius: 20,
+  padding: "16px 18px 18px",
+  marginBottom: 18,
+  border: "1px solid rgba(148,163,184,0.7)",
+  boxShadow: "0 18px 40px rgba(15,23,42,0.85)",
 };
 
 const sectionTitleStyle: CSSProperties = {
   fontSize: "0.95rem",
   fontWeight: 700,
-  color: "#9d174d",
+  color: "#f97373",
   marginBottom: 8,
 };
 
 const labelStyle: CSSProperties = {
   fontSize: "0.82rem",
-  color: "#9d174d",
+  color: "#e5e7eb",
   fontWeight: 600,
   display: "flex",
   flexDirection: "column",
@@ -452,10 +481,10 @@ const labelStyle: CSSProperties = {
 
 const inputStyle: CSSProperties = {
   borderRadius: 9999,
-  border: "1px solid #f9a8d4",
+  border: "1px solid rgba(148,163,184,0.7)",
   padding: "8px 12px",
   fontSize: "0.9rem",
-  color: "#374151",
+  color: "#0f172a",
   outline: "none",
-  backgroundColor: "#fff",
+  backgroundColor: "#f9fafb",
 };

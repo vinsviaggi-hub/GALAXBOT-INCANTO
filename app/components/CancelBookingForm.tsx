@@ -1,24 +1,23 @@
+// app/components/CancelBookingForm.tsx
 "use client";
 
-import React, {
-  useState,
-  type FormEvent,
-  type CSSProperties,
-} from "react";
+import React, { useState, type FormEvent, type CSSProperties } from "react";
 
 type CancelStatus = "idle" | "loading" | "success" | "notFound" | "error";
 
-// Stessi slot orari del negozio (come nel form di prenotazione)
+// Slot orari validi: 08:30–12:30 e 15:00–20:00
 const TIME_SLOTS: string[] = [
-  "08:00","08:15","08:30","08:45",
+  "08:30","08:45",
   "09:00","09:15","09:30","09:45",
   "10:00","10:15","10:30","10:45",
   "11:00","11:15","11:30","11:45",
-  "12:00","12:15","12:30","12:45",
+  "12:00","12:15","12:30",
   "15:00","15:15","15:30","15:45",
   "16:00","16:15","16:30","16:45",
   "17:00","17:15","17:30","17:45",
   "18:00","18:15","18:30","18:45",
+  "19:00","19:15","19:30","19:45",
+  "20:00",
 ];
 
 export default function CancelBookingForm() {
@@ -42,13 +41,13 @@ export default function CancelBookingForm() {
 
     if (!phone || !name || !service || !date || !time) {
       setStatus("error");
-      setMessage("Servono almeno nome, trattamento, telefono, data e ora.");
+      setMessage("Servono almeno nome, servizio, telefono, data e ora.");
       return;
     }
 
     if (!TIME_SLOTS.includes(time)) {
       setStatus("error");
-      setMessage("Seleziona un orario valido tra quelli del negozio.");
+      setMessage("Seleziona un orario valido tra quelli del barbiere.");
       return;
     }
 
@@ -75,15 +74,14 @@ export default function CancelBookingForm() {
           setStatus("notFound");
           setMessage(
             data?.error ||
-              "Non abbiamo trovato una prenotazione con questi dati. Controlla di aver inserito tutto uguale alla prenotazione."
+              "Non abbiamo trovato una prenotazione con questi dati. Controlla di aver inserito tutto correttamente."
           );
           return;
         }
 
         setStatus("error");
         setMessage(
-          data?.error ||
-            "Errore durante l'annullamento. Riprova più tardi."
+          data?.error || "Errore durante l'annullamento. Riprova più tardi."
         );
         return;
       }
@@ -108,33 +106,15 @@ export default function CancelBookingForm() {
     }
   }
 
-  const titleStyle: CSSProperties = {
-    fontSize: "1.2rem",
-    fontWeight: 700,
-    color: "#b91c1c",
-    marginBottom: 8,
-    display: "flex",
-    alignItems: "center",
-    gap: 8,
-  };
-
-  const subtitleStyle: CSSProperties = {
-    fontSize: "0.9rem",
-    color: "#6b7280",
-    marginBottom: 16,
-    lineHeight: 1.5,
-  };
-
   return (
     <section style={cardStyle}>
       <h2 style={titleStyle}>
-        Annulla prenotazione <span style={{ fontSize: "1.4rem" }}>❌</span>
+        Annulla prenotazione <span style={{ fontSize: "1.3rem" }}>❌</span>
       </h2>
       <p style={subtitleStyle}>
         Inserisci il <strong>telefono</strong>, il <strong>nome</strong>, il{" "}
-        <strong>trattamento</strong>, la <strong>data</strong> e l{"'"}{" "}
-        <strong>ora</strong> della prenotazione che vuoi annullare. Il sistema
-        aggiornerà il pannello e libererà lo slot.
+        <strong>servizio</strong>, la <strong>data</strong> e l{"'"}{" "}
+        <strong>ora</strong> della prenotazione che vuoi annullare.
       </p>
 
       <form
@@ -142,10 +122,10 @@ export default function CancelBookingForm() {
         style={{ display: "flex", flexDirection: "column", gap: 10 }}
       >
         <label style={labelStyle}>
-          Telefono usato in prenotazione <span style={{ color: "#b91c1c" }}>*</span>
+          Telefono <span style={{ color: "#f97373" }}>*</span>
           <input
             type="tel"
-            placeholder="Es. 389 561 7880"
+            placeholder="Es. 333 123 4567"
             value={phone}
             onChange={(e) => {
               resetMessages();
@@ -156,10 +136,10 @@ export default function CancelBookingForm() {
         </label>
 
         <label style={labelStyle}>
-          Nome in prenotazione <span style={{ color: "#b91c1c" }}>*</span>
+          Nome <span style={{ color: "#f97373" }}>*</span>
           <input
             type="text"
-            placeholder="Es. Aurora"
+            placeholder="Es. Marco"
             value={name}
             onChange={(e) => {
               resetMessages();
@@ -170,10 +150,10 @@ export default function CancelBookingForm() {
         </label>
 
         <label style={labelStyle}>
-          Trattamento prenotato <span style={{ color: "#b91c1c" }}>*</span>
+          Servizio <span style={{ color: "#f97373" }}>*</span>
           <input
             type="text"
-            placeholder="Es. viso, manicure, epilazione..."
+            placeholder="Es. taglio, barba, sfumatura..."
             value={service}
             onChange={(e) => {
               resetMessages();
@@ -185,7 +165,7 @@ export default function CancelBookingForm() {
 
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <label style={{ ...labelStyle, flex: 1, minWidth: 140 }}>
-            Data prenotazione <span style={{ color: "#b91c1c" }}>*</span>
+            Data <span style={{ color: "#f97373" }}>*</span>
             <input
               type="date"
               value={date}
@@ -198,7 +178,7 @@ export default function CancelBookingForm() {
           </label>
 
           <label style={{ ...labelStyle, flex: 1, minWidth: 140 }}>
-            Ora prenotazione <span style={{ color: "#b91c1c" }}>*</span>
+            Ora <span style={{ color: "#f97373" }}>*</span>
             <select
               value={time}
               onChange={(e) => {
@@ -229,67 +209,66 @@ export default function CancelBookingForm() {
             fontWeight: 600,
             background:
               status === "loading"
-                ? "linear-gradient(to right, #f97373, #f97373)"
-                : "linear-gradient(to right, #f97373, #f97316)",
+                ? "#f97373"
+                : "linear-gradient(to right, #ef4444, #991b1b)",
             color: "#fff",
             cursor: status === "loading" ? "default" : "pointer",
           }}
         >
-          {status === "loading" ? "Annullamento in corso…" : "Annulla prenotazione"}
+          {status === "loading"
+            ? "Annullamento in corso…"
+            : "Annulla prenotazione"}
         </button>
 
-        {message && status === "success" && (
+        {message && (
           <p
             style={{
               marginTop: 10,
               fontSize: "0.8rem",
-              color: "#15803d",
+              color:
+                status === "success"
+                  ? "#4ade80"
+                  : status === "notFound"
+                  ? "#facc15"
+                  : "#f87171",
             }}
           >
             {message}
           </p>
         )}
-
-        {message && status !== "success" && (
-          <p
-            style={{
-              marginTop: 10,
-              fontSize: "0.8rem",
-              color: status === "notFound" ? "#b45309" : "#b91c1c",
-            }}
-          >
-            {message}
-          </p>
-        )}
-
-        <p
-          style={{
-            marginTop: 8,
-            fontSize: "0.75rem",
-            color: "#6b7280",
-          }}
-        >
-          Suggerimento: copia i dati direttamente dal messaggio di conferma o
-          dal tuo calendario, così eviti errori.
-        </p>
       </form>
     </section>
   );
 }
 
-// Stili identici alla pagina principale, così la grafica resta uguale
+// ---------- STILI BASE ----------
+
 const cardStyle: CSSProperties = {
-  backgroundColor: "#fdf2f8",
+  backgroundColor: "#111827",
   borderRadius: 16,
   padding: "14px 18px 16px",
   marginBottom: 16,
-  border: "1px solid #f9a8d4",
-  boxShadow: "0 8px 24px rgba(244,114,182,0.15)",
+  border: "1px solid #374151",
+  boxShadow: "0 8px 24px rgba(0,0,0,0.5)",
+};
+
+const titleStyle: CSSProperties = {
+  fontSize: "1.1rem",
+  fontWeight: 700,
+  color: "#f97373",
+  marginBottom: 8,
+};
+
+const subtitleStyle: CSSProperties = {
+  fontSize: "0.85rem",
+  color: "#9ca3af",
+  marginBottom: 12,
+  lineHeight: 1.5,
 };
 
 const labelStyle: CSSProperties = {
   fontSize: "0.82rem",
-  color: "#9d174d",
+  color: "#e5e7eb",
   fontWeight: 600,
   display: "flex",
   flexDirection: "column",
@@ -298,10 +277,10 @@ const labelStyle: CSSProperties = {
 
 const inputStyle: CSSProperties = {
   borderRadius: 9999,
-  border: "1px solid #f9a8d4",
+  border: "1px solid #4b5563",
   padding: "8px 12px",
   fontSize: "0.9rem",
-  color: "#374151",
+  color: "#e5e7eb",
   outline: "none",
-  backgroundColor: "#fff",
+  backgroundColor: "#1f2937",
 };
