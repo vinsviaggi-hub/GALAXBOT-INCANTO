@@ -39,7 +39,7 @@ export default function FastBookingForm() {
       return;
     }
 
-    // ✅ Fasce orarie: 08:30–12:30 oppure 15:00–20:00
+    // ✅ Controllo fasce orarie: 08:00–13:00 oppure 15:00–19:00
     const minutes = timeToMinutes(time);
     if (minutes === null) {
       setStatus("error");
@@ -47,10 +47,10 @@ export default function FastBookingForm() {
       return;
     }
 
-    const fromMorning = 8 * 60 + 30;   // 08:30
-    const toMorning = 12 * 60 + 30;    // 12:30
-    const fromAfternoon = 15 * 60;     // 15:00
-    const toAfternoon = 20 * 60;       // 20:00
+    const fromMorning = 8 * 60;
+    const toMorning = 13 * 60;
+    const fromAfternoon = 15 * 60;
+    const toAfternoon = 19 * 60;
 
     const inMorning = minutes >= fromMorning && minutes <= toMorning;
     const inAfternoon = minutes >= fromAfternoon && minutes <= toAfternoon;
@@ -58,7 +58,7 @@ export default function FastBookingForm() {
     if (!inMorning && !inAfternoon) {
       setStatus("error");
       setMessage(
-        "Gli orari prenotabili sono 8:30–12:30 e 15:00–20:00, come indicato nella sezione Orari di apertura."
+        "Gli orari prenotabili sono 8:00–13:00 e 15:00–19:00, come indicato nella sezione Orari di apertura."
       );
       return;
     }
@@ -103,7 +103,7 @@ export default function FastBookingForm() {
       setStatus("success");
       setMessage(
         data?.message ||
-          "Prenotazione inviata con successo! Ti ricontatteremo per confermare l'appuntamento. 💈"
+          "Prenotazione inviata con successo! Ti ricontatteremo per confermare l'appuntamento. 💅"
       );
 
       // Pulisco i campi
@@ -208,7 +208,7 @@ export default function FastBookingForm() {
               resetMessages();
               setName(e.target.value);
             }}
-            placeholder="Es. Marco"
+            placeholder="Es. Aurora"
           />
         </div>
 
@@ -224,14 +224,14 @@ export default function FastBookingForm() {
               resetMessages();
               setPhone(e.target.value);
             }}
-            placeholder="Es. 333 123 4567"
+            placeholder="Es. 389 561 7880"
           />
         </div>
 
-        {/* Servizio */}
+        {/* Trattamento */}
         <div>
           <label style={labelStyle}>
-            Servizio desiderato <span style={{ color: "#b91c1c" }}>*</span>
+            Trattamento desiderato <span style={{ color: "#b91c1c" }}>*</span>
           </label>
           <input
             style={inputStyle}
@@ -240,7 +240,7 @@ export default function FastBookingForm() {
               resetMessages();
               setService(e.target.value);
             }}
-            placeholder="Es. taglio uomo, barba, sfumatura, kids…"
+            placeholder="Es. trattamento viso, manicure, epilazione…"
           />
         </div>
 
@@ -275,8 +275,8 @@ export default function FastBookingForm() {
               type="time"
               style={inputStyle}
               value={time}
-              min="08:30"
-              max="20:00"
+              min="08:00"
+              max="19:00"
               step={900} // 15 minuti
               onChange={(e) => {
                 resetMessages();
@@ -296,7 +296,7 @@ export default function FastBookingForm() {
               resetMessages();
               setNotes(e.target.value);
             }}
-            placeholder="Es. preferisco il pomeriggio, taglio veloce, bimbo piccolo…"
+            placeholder="Es. preferisco il mattino, pelle sensibile, trattamento rilassante…"
           />
         </div>
 
@@ -321,7 +321,7 @@ export default function FastBookingForm() {
             boxShadow: "0 14px 30px rgba(236,72,153,0.45)",
           }}
         >
-          {status === "loading" ? "Invio in corso…" : "Invia richiesta 💈"}
+          {status === "loading" ? "Invio in corso…" : "Invia richiesta 💅"}
         </button>
 
         {/* Messaggio dinamico */}

@@ -1,13 +1,11 @@
 // app/api/bookings/route.ts
 import { NextRequest, NextResponse } from "next/server";
 
-// 🔗 Web App URL di Google Apps Script per
-// "GalaxBot - Idee per la Testa" (BARBIERE)
-const SCRIPT_URL =
-  "https://script.google.com/macros/s/AKfycbxZrsGAlCw9fweBfAqYTZ-scfEcvR_fpEvD094znv0Q0oDAxAcFxxvu21j8OG3nUQk/exec";
+// URL della Web App di Google Script, letto da variabile ambiente Vercel
+const SCRIPT_URL = process.env.BOOKING_WEBAPP_URL || "";
 
 type BookingBody = {
-  action?: "create_booking" | "cancel_booking";
+  mode?: "create" | "cancel"; // 👈 nuovo: tipo operazione (default: create)
   name?: string;
   phone?: string;
   service?: string;
@@ -19,12 +17,12 @@ type BookingBody = {
 export async function POST(req: NextRequest) {
   try {
     if (!SCRIPT_URL) {
-      console.error("[BOOKINGS] SCRIPT_URL non impostata");
+      console.error("[BOOKINGS] BOOKING_WEBAPP_URL non impostata");
       return NextResponse.json(
         {
           success: false,
           error:
-            "Configurazione mancante del pannello prenotazioni. Contatta l'amministratore del sito.",
+            "Configurazione mancante: contatta l'amministratore del sito.",
         },
         { status: 500 }
       );
@@ -43,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     const {
-      action = "create_booking",
+      mode = "create",
       name,
       phone,
       service,
@@ -52,42 +50,105 @@ export async function POST(req: NextRequest) {
       notes,
     } = body;
 
-    // ✅ VALIDAZIONI BASE
-    if (action === "create_booking") {
-      if (!name || !service || !date || !time) {
+    //
+    // 1️⃣ MODALITÀ CANCELLAZIONE PRENOTAZIONE
+    //
+    if (mode === "cancel") {
+      if (!phone || !date || !time) {
         return NextResponse.json(
           {
             success: false,
             error:
-              "Per prenotare servono almeno nome, trattamento, data e ora.",
+              "Per annullare servono telefono, data e ora della prenotazione.",
           },
           { status: 400 }
         );
       }
-    } else if (action === "cancel_booking") {
-      if (!phone || !name || !service || !date || !time) {
+
+      const payload = {
+        action: "cancel_booking",
+        phone: String(phone).trim(),
+        date: String(date).trim(),
+        time: String(time).trim(),
+      };
+
+      const gsRes = await fetch(SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await gsRes.text();
+      let data: any;
+
+      try {
+        data = JSON.parse(text);
+      } catch (err) {
+        console.error(
+          "[BOOKINGS CANCEL] Risposta NON JSON da Apps Script:",
+          text
+        );
         return NextResponse.json(
           {
             success: false,
-            error:
-              "Per annullare servono telefono, nome, trattamento, data e ora.",
+            error: "Errore nel collegamento al foglio prenotazioni.",
+          },
+          { status: 502 }
+        );
+      }
+
+      if (!gsRes.ok || !data?.success) {
+        const errorMessage: string =
+          data?.error ||
+          data?.message ||
+          "Non è stato possibile annullare la prenotazione.";
+
+        return NextResponse.json(
+          {
+            success: false,
+            error: errorMessage,
           },
           { status: 400 }
         );
       }
+
+      // ✅ Annullamento ok
+      return NextResponse.json(
+        {
+          success: true,
+          rowNumber: data.rowNumber ?? null,
+          message:
+            data.message || "Prenotazione annullata correttamente dal pannello.",
+        },
+        { status: 200 }
+      );
     }
 
+    //
+    // 2️⃣ MODALITÀ CREAZIONE PRENOTAZIONE (come avevi prima)
+    //
+    if (!name || !service || !date || !time) {
+      return NextResponse.json(
+        {
+          success: false,
+          error:
+            "Per prenotare servono almeno nome, trattamento, data e ora.",
+        },
+        { status: 400 }
+      );
+    }
+
+    // Payload che mandiamo ad Apps Script
     const payload = {
-      action,
-      name: name ? String(name).trim() : "",
+      action: "create_booking",
+      name: String(name).trim(),
       phone: phone ? String(phone).trim() : "",
-      service: service ? String(service).trim() : "",
-      date: date ? String(date).trim() : "",
-      time: time ? String(time).trim() : "",
+      service: String(service).trim(),
+      date: String(date).trim(),
+      time: String(time).trim(),
       notes: notes ? String(notes).trim() : "",
     };
 
-    // 🔄 CHIAMATA ALLO SCRIPT GOOGLE
     const gsRes = await fetch(SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -100,7 +161,7 @@ export async function POST(req: NextRequest) {
     try {
       data = JSON.parse(text);
     } catch (err) {
-      console.error("[BOOKINGS] Risposta NON JSON da Apps Script:", text);
+      console.error("[BOOKINGS CREATE] Risposta NON JSON da Apps Script:", text);
       return NextResponse.json(
         {
           success: false,
@@ -110,58 +171,32 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ❌ ERRORE DALLO SCRIPT
     if (!gsRes.ok || !data?.success) {
       const errorMessage: string =
         data?.error ||
         data?.message ||
-        "Operazione non riuscita sul foglio prenotazioni.";
+        "Non è stato possibile salvare la prenotazione.";
 
-      if (data?.conflict) {
-        // slot già occupato
-        return NextResponse.json(
-          {
-            success: false,
-            conflict: true,
-            error: errorMessage,
-          },
-          { status: 409 }
-        );
-      }
-
-      if (data?.notFound) {
-        // prenotazione non trovata per annullamento
-        return NextResponse.json(
-          {
-            success: false,
-            notFound: true,
-            error: errorMessage,
-          },
-          { status: 404 }
-        );
-      }
+      const statusCode = data?.conflict ? 409 : 400;
 
       return NextResponse.json(
         {
           success: false,
+          conflict: Boolean(data?.conflict),
           error: errorMessage,
         },
-        { status: 400 }
+        { status: statusCode }
       );
     }
 
-    // ✅ TUTTO OK
+    // ✅ Tutto ok (creazione)
     return NextResponse.json(
       {
         success: true,
         rowNumber: data.rowNumber ?? null,
-        conflict: false,
-        notFound: false,
         message:
           data.message ||
-          (action === "cancel_booking"
-            ? "Prenotazione annullata correttamente. Lo slot è stato liberato."
-            : "Prenotazione salvata correttamente nel pannello Idee per la Testa."),
+          "Prenotazione salvata correttamente nel pannello Incanto.",
       },
       { status: 200 }
     );
