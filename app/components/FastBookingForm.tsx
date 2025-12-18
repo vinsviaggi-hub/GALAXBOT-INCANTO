@@ -202,6 +202,8 @@ export default function FastBookingForm() {
             Nome <span style={{ color: "#b91c1c" }}>*</span>
           </label>
           <input
+            type="text"
+            autoComplete="name"
             style={inputStyle}
             value={name}
             onChange={(e) => {
@@ -218,13 +220,15 @@ export default function FastBookingForm() {
             Telefono <span style={{ color: "#b91c1c" }}>*</span>
           </label>
           <input
+            type="tel"
+            autoComplete="tel"
             style={inputStyle}
             value={phone}
             onChange={(e) => {
               resetMessages();
               setPhone(e.target.value);
             }}
-            placeholder="Es. 389 561 7880"
+            placeholder="Es. +39 000 000 0000"
           />
         </div>
 
@@ -234,6 +238,7 @@ export default function FastBookingForm() {
             Trattamento desiderato <span style={{ color: "#b91c1c" }}>*</span>
           </label>
           <input
+            type="text"
             style={inputStyle}
             value={service}
             onChange={(e) => {

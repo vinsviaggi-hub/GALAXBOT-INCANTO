@@ -1,10 +1,14 @@
 // app/layout.tsx
 import "./globals.css";
+import type { Metadata } from "next";
 
-export const metadata = {
-  title: "GalaxBot AI 🚀",
+export const metadata: Metadata = {
+  title: {
+    default: "GalaxBot Demo 🚀",
+    template: "%s · GalaxBot Demo",
+  },
   description:
-    "Creiamo assistenti virtuali e app smart per aziende e professionisti. Automatizza risposte, prenotazioni e vendite con l’intelligenza artificiale.",
+    "Demo: assistente virtuale + prenotazioni smart per aziende e professionisti. Prova chat e modulo prenotazione in tempo reale.",
 };
 
 export default function RootLayout({

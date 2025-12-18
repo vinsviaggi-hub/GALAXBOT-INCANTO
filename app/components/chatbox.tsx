@@ -1,12 +1,7 @@
 // app/components/chatbox.tsx
 "use client";
 
-import {
-  useState,
-  useRef,
-  useEffect,
-  type KeyboardEvent,
-} from "react";
+import { useState, useRef, useEffect, type KeyboardEvent } from "react";
 
 type Message = {
   sender: "user" | "bot";
@@ -48,6 +43,12 @@ export default function ChatBox({ sector }: ChatBoxProps) {
 
   // 👉 contenitore dei messaggi, per fare scroll interno
   const messagesRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  // focus iniziale sull'input
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   // ogni volta che arriva un nuovo messaggio, scrolla in basso SOLO nel box
   useEffect(() => {
@@ -61,10 +62,7 @@ export default function ChatBox({ sector }: ChatBoxProps) {
 
     const userText = input.trim();
 
-    const newMessages: Message[] = [
-      ...messages,
-      { sender: "user", text: userText },
-    ];
+    const newMessages: Message[] = [...messages, { sender: "user", text: userText }];
 
     setMessages(newMessages);
     setInput("");
@@ -103,6 +101,7 @@ export default function ChatBox({ sector }: ChatBoxProps) {
       ]);
     } finally {
       setLoading(false);
+      inputRef.current?.focus();
     }
   }
 
@@ -112,6 +111,8 @@ export default function ChatBox({ sector }: ChatBoxProps) {
       sendMessage();
     }
   }
+
+  const isSendDisabled = loading || !input.trim();
 
   return (
     <div
@@ -190,11 +191,14 @@ export default function ChatBox({ sector }: ChatBoxProps) {
         }}
       >
         <input
+          ref={inputRef}
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Scrivi qui il tuo messaggio..."
+          autoComplete="off"
+          aria-label="Scrivi un messaggio"
           style={{
             flex: 1,
             borderRadius: 9999,
@@ -206,16 +210,16 @@ export default function ChatBox({ sector }: ChatBoxProps) {
         />
         <button
           onClick={sendMessage}
-          disabled={loading}
+          disabled={isSendDisabled}
           style={{
             borderRadius: 9999,
             border: "none",
             padding: "10px 18px",
             fontWeight: 600,
             fontSize: "0.95rem",
-            background: loading ? "#64748b" : "#16a3ff",
+            background: isSendDisabled ? "#64748b" : "#16a3ff",
             color: "#ffffff",
-            cursor: loading ? "default" : "pointer",
+            cursor: isSendDisabled ? "default" : "pointer",
             minWidth: 80,
           }}
         >

@@ -1,15 +1,17 @@
- // app/page.tsx
+// app/page.tsx
 "use client";
 
-import React, {
-  useState,
-  type FormEvent,
-  type CSSProperties,
-} from "react";
+import React, { useState, type FormEvent, type CSSProperties } from "react";
 import ChatBox from "./components/chatbox";
 import CancelBookingForm from "./components/CancelBookingForm";
 
 type Status = "idle" | "loading" | "success" | "conflict" | "error";
+
+// ✅ DATI DEMO (cambia solo questi quando vuoi)
+const DEMO_BUSINESS_LABEL = "GalaxBot AI · Centro estetico";
+const DEMO_BUSINESS_NAME = "Centro Estetico Demo";
+const DEMO_ADDRESS = "Via Esempio 123 – Città (IT)";
+const DEMO_PHONE = "+39 000 000 0000";
 
 // Slot orari validi: 08:00–13:00 e 15:00–19:00 ogni 15 minuti
 const TIME_SLOTS: string[] = [
@@ -289,7 +291,7 @@ function FastBookingSection() {
   );
 }
 
-export default function IncantoPage() {
+export default function DemoEsteticaPage() {
   return (
     <main
       style={{
@@ -317,7 +319,7 @@ export default function IncantoPage() {
               marginBottom: 4,
             }}
           >
-            GalaxBot AI · Centro estetico
+            {DEMO_BUSINESS_LABEL}
           </div>
           <h1
             style={{
@@ -327,7 +329,7 @@ export default function IncantoPage() {
               marginBottom: 6,
             }}
           >
-            Incanto di Aurora D&apos;Ignazio
+            {DEMO_BUSINESS_NAME}
           </h1>
           <p
             style={{
@@ -355,8 +357,8 @@ export default function IncantoPage() {
             }}
           >
             <li>Centro estetico &amp; nail art</li>
-            <li>Via Strada Statale 150, n°114 – Pianura di Guardia Vomano</li>
-            <li>Telefono: 389 561 7880</li>
+            <li>{DEMO_ADDRESS}</li>
+            <li>Telefono: {DEMO_PHONE}</li>
             <li>
               Trattamenti viso, corpo, unghie, epilazione e percorsi
               personalizzati.

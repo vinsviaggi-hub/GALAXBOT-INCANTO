@@ -15,17 +15,25 @@ type ChatRequestBody = {
 };
 
 /**
- * Prompt specifico per INCANTO DI AURORA D'IGNAZIO
+ * ✅ PROMPT DEMO GENERICO (estetica)
+ * Cambia solo questi dati se vuoi personalizzare una demo diversa.
  */
+const DEMO_BUSINESS_NAME = "Centro Estetico Demo";
+const DEMO_BUSINESS_TAGLINE = "Centro estetico & nail art";
+const DEMO_ADDRESS = "Via Esempio 123 – Città (IT)";
+const DEMO_PHONE = "+39 000 000 0000";
+const DEMO_HOURS =
+  "lunedì–sabato 8:00–13:00 e 15:00–19:00, domenica chiuso.";
+
 function getSystemPrompt(): string {
   return `
-Sei GalaxBot AI, l'assistente virtuale del centro estetico "Incanto di Aurora D'Ignazio".
+Sei GalaxBot AI, l'assistente virtuale di un centro estetico in versione DEMO.
 
-Dati del centro:
-- Nome: Incanto di Aurora D'Ignazio – Centro estetico & nail art
-- Indirizzo: Via Strada Statale 150, n° 114 – Pianura di Guardia Vomano (Notaresco)
-- Telefono: 389 561 7880
-- Orari indicativi: lunedì–sabato 8:00–13:00 e 15:00–19:00, domenica chiuso.
+Dati del centro (DEMO):
+- Nome: ${DEMO_BUSINESS_NAME} – ${DEMO_BUSINESS_TAGLINE}
+- Indirizzo: ${DEMO_ADDRESS}
+- Telefono: ${DEMO_PHONE}
+- Orari indicativi: ${DEMO_HOURS}
 
 Tono:
 - gentile, professionale ed elegante, ma semplice
@@ -59,6 +67,10 @@ Stile di risposta:
 - Usa il "tu".
 - Vai dritto al punto, senza testi troppo lunghi.
 - Se serve dare molti dettagli su un trattamento, proponi di spiegare meglio in un secondo messaggio.
+
+Nota:
+- Questa è una DEMO: se l'utente chiede dati iper-specifici del salone reale (staff, listino completo, promozioni attive),
+  rispondi che variano e che vengono confermati direttamente dal centro.
 `;
 }
 
@@ -72,10 +84,7 @@ export async function POST(req: Request) {
     const completion = await client.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        {
-          role: "system",
-          content: systemPrompt,
-        },
+        { role: "system", content: systemPrompt },
         ...messages.map((m) => ({
           role: m.sender === "user" ? ("user" as const) : ("assistant" as const),
           content: m.text,
@@ -89,9 +98,7 @@ export async function POST(req: Request) {
 
     return new Response(JSON.stringify({ reply }), {
       status: 200,
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
     console.error("Errore API /api/chat:", error);
@@ -102,9 +109,7 @@ export async function POST(req: Request) {
       }),
       {
         status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
       }
     );
   }

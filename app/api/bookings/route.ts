@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 const SCRIPT_URL = process.env.BOOKING_WEBAPP_URL || "";
 
 type BookingBody = {
-  mode?: "create" | "cancel"; // 👈 nuovo: tipo operazione (default: create)
+  mode?: "create" | "cancel"; // 👈 tipo operazione (default: create)
   name?: string;
   phone?: string;
   service?: string;
@@ -21,8 +21,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Configurazione mancante: contatta l'amministratore del sito.",
+          error: "Configurazione mancante: contatta l'amministratore del sito.",
         },
         { status: 500 }
       );
@@ -40,15 +39,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const {
-      mode = "create",
-      name,
-      phone,
-      service,
-      date,
-      time,
-      notes,
-    } = body;
+    const { mode = "create", name, phone, service, date, time, notes } = body;
 
     //
     // 1️⃣ MODALITÀ CANCELLAZIONE PRENOTAZIONE
@@ -83,11 +74,8 @@ export async function POST(req: NextRequest) {
 
       try {
         data = JSON.parse(text);
-      } catch (err) {
-        console.error(
-          "[BOOKINGS CANCEL] Risposta NON JSON da Apps Script:",
-          text
-        );
+      } catch {
+        console.error("[BOOKINGS CANCEL] Risposta NON JSON da Apps Script:", text);
         return NextResponse.json(
           {
             success: false,
@@ -125,14 +113,13 @@ export async function POST(req: NextRequest) {
     }
 
     //
-    // 2️⃣ MODALITÀ CREAZIONE PRENOTAZIONE (come avevi prima)
+    // 2️⃣ MODALITÀ CREAZIONE PRENOTAZIONE
     //
     if (!name || !service || !date || !time) {
       return NextResponse.json(
         {
           success: false,
-          error:
-            "Per prenotare servono almeno nome, trattamento, data e ora.",
+          error: "Per prenotare servono almeno nome, trattamento, data e ora.",
         },
         { status: 400 }
       );
@@ -160,7 +147,7 @@ export async function POST(req: NextRequest) {
 
     try {
       data = JSON.parse(text);
-    } catch (err) {
+    } catch {
       console.error("[BOOKINGS CREATE] Risposta NON JSON da Apps Script:", text);
       return NextResponse.json(
         {
@@ -196,7 +183,7 @@ export async function POST(req: NextRequest) {
         rowNumber: data.rowNumber ?? null,
         message:
           data.message ||
-          "Prenotazione salvata correttamente nel pannello Incanto.",
+          "Prenotazione salvata correttamente nel pannello demo.",
       },
       { status: 200 }
     );

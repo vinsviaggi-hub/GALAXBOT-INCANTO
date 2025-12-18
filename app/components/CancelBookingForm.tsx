@@ -146,13 +146,15 @@ export default function CancelBookingForm() {
             <span style={{ color: "#b91c1c" }}>*</span>
           </label>
           <input
+            type="tel"
+            autoComplete="tel"
             style={inputStyle}
             value={phone}
             onChange={(e) => {
               resetMessages();
               setPhone(e.target.value);
             }}
-            placeholder="Es. 389 561 7880"
+            placeholder="Es. +39 000 000 0000"
           />
         </div>
 
