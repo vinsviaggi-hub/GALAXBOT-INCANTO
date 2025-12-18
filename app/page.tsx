@@ -13,26 +13,13 @@ const DEMO_BUSINESS_NAME = "Centro Estetico Demo";
 const DEMO_ADDRESS = "Via Esempio 123 – Città (IT)";
 const DEMO_PHONE = "+39 000 000 0000";
 
-// Slot orari validi: 08:00–13:00 e 15:00–19:00 ogni 15 minuti
-const TIME_SLOTS: string[] = [
-  "08:00", "08:15", "08:30", "08:45",
-  "09:00", "09:15", "09:30", "09:45",
-  "10:00", "10:15", "10:30", "10:45",
-  "11:00", "11:15", "11:30", "11:45",
-  "12:00", "12:15", "12:30", "12:45",
-  "15:00", "15:15", "15:30", "15:45",
-  "16:00", "16:15", "16:30", "16:45",
-  "17:00", "17:15", "17:30", "17:45",
-  "18:00", "18:15", "18:30", "18:45",
-];
-
 // 🔹 Sezione prenotazione veloce – collegata a /api/bookings
 function FastBookingSection() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [service, setService] = useState("");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState(""); // ✅ ORARIO PREFERITO (indicativo)
   const [notes, setNotes] = useState("");
 
   const [status, setStatus] = useState<Status>("idle");
@@ -53,15 +40,6 @@ function FastBookingSection() {
       return;
     }
 
-    // ✅ Controllo che l'orario sia tra quelli consentiti
-    if (!TIME_SLOTS.includes(time)) {
-      setStatus("error");
-      setMessage(
-        "Gli orari prenotabili sono 8:00–13:00 e 15:00–19:00, come indicato nella sezione Orari di apertura."
-      );
-      return;
-    }
-
     try {
       setStatus("loading");
 
@@ -73,7 +51,7 @@ function FastBookingSection() {
           phone,
           service,
           date,
-          time,
+          time, // 👈 orario preferito (indicativo)
           notes,
         }),
       });
@@ -85,7 +63,7 @@ function FastBookingSection() {
           setStatus("conflict");
           setMessage(
             data?.error ||
-              "Per questa data e ora c'è già una prenotazione. Scegli un altro orario."
+              "C'è già una richiesta simile per quella data/orario. Prova a scegliere un altro orario indicativo."
           );
           return;
         }
@@ -93,19 +71,17 @@ function FastBookingSection() {
         setStatus("error");
         setMessage(
           data?.error ||
-            "Si è verificato un errore durante il salvataggio della prenotazione."
+            "Si è verificato un errore durante l’invio della richiesta."
         );
         return;
       }
 
-      // ✅ Tutto ok: salvato su Google Sheet
       setStatus("success");
       setMessage(
         data?.message ||
-          "Prenotazione inviata con successo! Ti ricontatteremo per confermare l'appuntamento. 💅"
+          "Richiesta inviata! Ti ricontatteremo per confermare l’orario in base alla durata del trattamento. 💅"
       );
 
-      // Pulisco i campi
       setName("");
       setPhone("");
       setService("");
@@ -124,27 +100,21 @@ function FastBookingSection() {
   return (
     <section style={cardStyle}>
       <h2 style={sectionTitleStyle}>Prenotazione veloce ✨</h2>
-      <p
-        style={{
-          fontSize: "0.85rem",
-          color: "#6b7280",
-          marginBottom: 12,
-        }}
-      >
-        Richiedi un appuntamento indicando i dati principali. Ti
-        ricontatteremo per confermare giorno e orario.
+      <p style={helperTextStyle}>
+        Inserisci i dati principali. <strong>L’orario è indicativo</strong>:
+        verrà confermato in base alla durata del trattamento.
       </p>
 
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: 10 }}
       >
-        {/* Nome */}
         <label style={labelStyle}>
           Nome <span style={{ color: "#b91c1c" }}>*</span>
           <input
             type="text"
-            placeholder="Es. Aurora"
+            autoComplete="name"
+            placeholder="Es. Nome e cognome"
             value={name}
             onChange={(e) => {
               resetMessages();
@@ -154,12 +124,12 @@ function FastBookingSection() {
           />
         </label>
 
-        {/* Telefono */}
         <label style={labelStyle}>
           Telefono <span style={{ color: "#b91c1c" }}>*</span>
           <input
             type="tel"
-            placeholder="Es. 389 561 7880"
+            autoComplete="tel"
+            placeholder="Es. +39 000 000 0000"
             value={phone}
             onChange={(e) => {
               resetMessages();
@@ -169,13 +139,11 @@ function FastBookingSection() {
           />
         </label>
 
-        {/* Trattamento */}
         <label style={labelStyle}>
-          Trattamento desiderato{" "}
-          <span style={{ color: "#b91c1c" }}>*</span>
+          Trattamento desiderato <span style={{ color: "#b91c1c" }}>*</span>
           <input
             type="text"
-            placeholder="Es. trattamento viso, manicure, epilazione..."
+            placeholder="Es. manicure, epilazione, trattamento viso..."
             value={service}
             onChange={(e) => {
               resetMessages();
@@ -185,7 +153,6 @@ function FastBookingSection() {
           />
         </label>
 
-        {/* Data + Ora */}
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           <label style={{ ...labelStyle, flex: 1, minWidth: 140 }}>
             Data <span style={{ color: "#b91c1c" }}>*</span>
@@ -201,35 +168,26 @@ function FastBookingSection() {
           </label>
 
           <label style={{ ...labelStyle, flex: 1, minWidth: 140 }}>
-            Ora <span style={{ color: "#b91c1c" }}>*</span>
-            {/* SELECT con soli orari validi */}
-            <select
+            Orario preferito (indicativo){" "}
+            <span style={{ color: "#b91c1c" }}>*</span>
+            <input
+              type="time"
               value={time}
+              step={900}
               onChange={(e) => {
                 resetMessages();
                 setTime(e.target.value);
               }}
-              style={{
-                ...inputStyle,
-                paddingRight: "28px",
-              }}
-            >
-              <option value="">Seleziona un orario</option>
-              {TIME_SLOTS.map((slot) => (
-                <option key={slot} value={slot}>
-                  {slot}
-                </option>
-              ))}
-            </select>
+              style={inputStyle}
+            />
           </label>
         </div>
 
-        {/* Note */}
         <label style={labelStyle}>
           Note (facoltative)
           <textarea
             rows={3}
-            placeholder="Es. preferisco il mattino, pelle sensibile, trattamento rilassante..."
+            placeholder="Es. preferisco mattina/pomeriggio, pelle sensibile, prima volta..."
             value={notes}
             onChange={(e) => {
               resetMessages();
@@ -243,7 +201,6 @@ function FastBookingSection() {
           />
         </label>
 
-        {/* Bottone */}
         <button
           type="submit"
           disabled={status === "loading"}
@@ -262,27 +219,13 @@ function FastBookingSection() {
           {status === "loading" ? "Invio in corso…" : "Invia richiesta 💅"}
         </button>
 
-        {/* Messaggi dinamici */}
         {message && status !== "success" && (
-          <p
-            style={{
-              marginTop: 10,
-              fontSize: "0.8rem",
-              color: "#b91c1c",
-            }}
-          >
+          <p style={{ marginTop: 10, fontSize: "0.8rem", color: "#b91c1c" }}>
             {message}
           </p>
         )}
-
         {message && status === "success" && (
-          <p
-            style={{
-              marginTop: 10,
-              fontSize: "0.8rem",
-              color: "#15803d",
-            }}
-          >
+          <p style={{ marginTop: 10, fontSize: "0.8rem", color: "#15803d" }}>
             {message}
           </p>
         )}
@@ -302,12 +245,22 @@ export default function DemoEsteticaPage() {
           "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
       }}
     >
-      <div
-        style={{
-          maxWidth: 960,
-          margin: "0 auto",
-        }}
-      >
+      {/* ✅ keyframes qui dentro così funziona anche su Vercel */}
+      <style jsx global>{`
+        @keyframes floaty {
+          0% {
+            transform: translateY(0) rotate(0deg);
+          }
+          50% {
+            transform: translateY(-4px) rotate(-4deg);
+          }
+          100% {
+            transform: translateY(0) rotate(0deg);
+          }
+        }
+      `}</style>
+
+      <div style={{ maxWidth: 960, margin: "0 auto" }}>
         {/* Header */}
         <header style={{ textAlign: "center", marginBottom: 24 }}>
           <div
@@ -321,16 +274,22 @@ export default function DemoEsteticaPage() {
           >
             {DEMO_BUSINESS_LABEL}
           </div>
+
           <h1
             style={{
               fontSize: "1.7rem",
               fontWeight: 700,
               color: "#4a044e",
               marginBottom: 6,
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
             }}
           >
             {DEMO_BUSINESS_NAME}
+            <span style={floatingIconStyle}>💅</span>
           </h1>
+
           <p
             style={{
               fontSize: "0.9rem",
@@ -347,15 +306,7 @@ export default function DemoEsteticaPage() {
         {/* Info principali */}
         <section style={cardStyle}>
           <h2 style={sectionTitleStyle}>Informazioni principali</h2>
-          <ul
-            style={{
-              margin: 0,
-              paddingLeft: "1.2rem",
-              fontSize: "0.9rem",
-              color: "#374151",
-              lineHeight: 1.6,
-            }}
-          >
+          <ul style={listStyle}>
             <li>Centro estetico &amp; nail art</li>
             <li>{DEMO_ADDRESS}</li>
             <li>Telefono: {DEMO_PHONE}</li>
@@ -366,67 +317,58 @@ export default function DemoEsteticaPage() {
           </ul>
         </section>
 
+        {/* Mini sezione */}
+        <section style={cardStyle}>
+          <h2 style={sectionTitleStyle}>Trattamenti in evidenza</h2>
+          <p style={helperTextStyle}>
+            Esempio di menu (demo). Il bot può rispondere a domande su durata,
+            preparazione e consigli.
+          </p>
+          <ul style={listStyle}>
+            <li>Manicure / Semipermanente / Ricostruzione</li>
+            <li>Pulizia viso / Idratazione / Anti-age</li>
+            <li>Epilazione (zone singole o complete)</li>
+            <li>Trattamenti corpo (relax, drenante, scrub)</li>
+          </ul>
+          <p style={{ fontSize: "0.8rem", color: "#6b7280", marginTop: 10 }}>
+            * Prezzi e durata variano: vengono confermati dopo la richiesta.
+          </p>
+        </section>
+
         {/* Chat assistente */}
         <section style={cardStyle}>
           <h2 style={sectionTitleStyle}>Chat assistente virtuale 💬</h2>
-          <p
-            style={{
-              fontSize: "0.85rem",
-              color: "#6b7280",
-              marginBottom: 8,
-            }}
-          >
+          <p style={helperTextStyle}>
             Fai una domanda come farebbe una cliente: trattamenti, tempi,
             consigli di bellezza, promozioni…
           </p>
-
           <ChatBox sector="estetica" />
         </section>
 
-        {/* Orari */}
+        {/* Disponibilità e conferma */}
         <section style={cardStyle}>
-          <h2 style={sectionTitleStyle}>Orari di apertura</h2>
-          <ul
-            style={{
-              margin: 0,
-              paddingLeft: "1.2rem",
-              fontSize: "0.9rem",
-              color: "#374151",
-              lineHeight: 1.6,
-            }}
-          >
-            <li>Lunedì–Sabato: 8:00–13:00 e 15:00–19:00</li>
-            <li>Domenica: chiuso</li>
+          <h2 style={sectionTitleStyle}>Disponibilità e conferma</h2>
+          <ul style={listStyle}>
+            <li>Indica una data e un orario preferito (indicativo).</li>
+            <li>
+              La durata varia in base al trattamento, quindi l’orario finale
+              viene confermato dopo la richiesta.
+            </li>
+            <li>Se hai urgenza, scrivici su WhatsApp.</li>
           </ul>
         </section>
 
-        {/* Prenotazione veloce */}
+        {/* Prenotazione */}
         <FastBookingSection />
 
-        {/* Annulla prenotazione */}
-        <section style={cardStyle}>
-          <h2 style={sectionTitleStyle}>Annulla prenotazione ❌</h2>
-          <p
-            style={{
-              fontSize: "0.85rem",
-              color: "#6b7280",
-              marginBottom: 12,
-            }}
-          >
-            Non puoi più venire all&apos;appuntamento? Inserisci i dati della
-            prenotazione che vuoi annullare (stesso nome, stessa data e stessa
-            ora). Il sistema aggiornerà il pannello e libererà lo slot.
-          </p>
-
-          <CancelBookingForm />
-        </section>
+        {/* ✅ Annulla prenotazione: UNA SOLA VOLTA (il titolo lo fa già il componente) */}
+        <CancelBookingForm />
       </div>
     </main>
   );
 }
 
 // ---------- STILI BASE ----------
-
 const cardStyle: CSSProperties = {
   backgroundColor: "#fdf2f8",
   borderRadius: 16,
@@ -441,6 +383,20 @@ const sectionTitleStyle: CSSProperties = {
   fontWeight: 700,
   color: "#9d174d",
   marginBottom: 8,
+};
+
+const helperTextStyle: CSSProperties = {
+  fontSize: "0.85rem",
+  color: "#6b7280",
+  marginBottom: 12,
+};
+
+const listStyle: CSSProperties = {
+  margin: 0,
+  paddingLeft: "1.2rem",
+  fontSize: "0.9rem",
+  color: "#374151",
+  lineHeight: 1.6,
 };
 
 const labelStyle: CSSProperties = {
@@ -460,4 +416,10 @@ const inputStyle: CSSProperties = {
   color: "#374151",
   outline: "none",
   backgroundColor: "#fff",
+};
+
+const floatingIconStyle: CSSProperties = {
+  display: "inline-block",
+  animation: "floaty 2.2s ease-in-out infinite",
+  transformOrigin: "center",
 };

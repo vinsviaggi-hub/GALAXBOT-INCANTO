@@ -27,3 +27,16 @@ img {
   height: auto;
   display: block;
 }
+
+/* ✅ Animazione icona (usata in app/page.tsx) */
+@keyframes floaty {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-4px) rotate(-4deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}

@@ -22,7 +22,7 @@ export default function CancelBookingForm() {
 
     if (!phone || !date || !time) {
       setStatus("error");
-      setMessage("Compila telefono, data e ora per annullare la prenotazione.");
+      setMessage("Compila telefono, data e orario indicato per annullare.");
       return;
     }
 
@@ -33,7 +33,7 @@ export default function CancelBookingForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          mode: "cancel", // 👈 dice all’API che questa è una cancellazione
+          mode: "cancel",
           phone,
           date,
           time,
@@ -46,7 +46,7 @@ export default function CancelBookingForm() {
         setStatus("error");
         setMessage(
           data?.error ||
-            "Non sono riuscito ad annullare la prenotazione. Controlla i dati."
+            "Non sono riuscito ad annullare la richiesta. Controlla i dati."
         );
         return;
       }
@@ -54,7 +54,7 @@ export default function CancelBookingForm() {
       setStatus("success");
       setMessage(
         data?.message ||
-          "Prenotazione annullata correttamente. Ti aspettiamo quando vuoi! 💖"
+          "Richiesta annullata correttamente. Ti aspettiamo quando vuoi! 💖"
       );
 
       setPhone("");
@@ -69,7 +69,6 @@ export default function CancelBookingForm() {
     }
   }
 
-  // Stili: stessi “toni” rosa del FastBookingForm
   const cardStyle: CSSProperties = {
     backgroundColor: "#ffe4f2",
     borderRadius: 18,
@@ -129,21 +128,19 @@ export default function CancelBookingForm() {
       >
         Annulla prenotazione ❌
       </h2>
+
       <p style={helperStyle}>
-        Inserisci il{" "}
-        <strong>telefono, la data e l&apos;ora della prenotazione</strong> che
-        vuoi annullare. Il sistema aggiornerà il pannello in automatico.
+        Inserisci <strong>telefono, data e orario indicato</strong> nella
+        richiesta. Il sistema aggiornerà il pannello.
       </p>
 
       <form
         onSubmit={handleSubmit}
         style={{ display: "flex", flexDirection: "column", gap: 10 }}
       >
-        {/* Telefono */}
         <div>
           <label style={labelStyle}>
-            Telefono usato in prenotazione{" "}
-            <span style={{ color: "#b91c1c" }}>*</span>
+            Telefono <span style={{ color: "#b91c1c" }}>*</span>
           </label>
           <input
             type="tel"
@@ -158,10 +155,9 @@ export default function CancelBookingForm() {
           />
         </div>
 
-        {/* Data */}
         <div>
           <label style={labelStyle}>
-            Data prenotazione <span style={{ color: "#b91c1c" }}>*</span>
+            Data <span style={{ color: "#b91c1c" }}>*</span>
           </label>
           <input
             type="date"
@@ -174,15 +170,15 @@ export default function CancelBookingForm() {
           />
         </div>
 
-        {/* Ora */}
         <div>
           <label style={labelStyle}>
-            Ora prenotazione <span style={{ color: "#b91c1c" }}>*</span>
+            Orario indicato <span style={{ color: "#b91c1c" }}>*</span>
           </label>
           <input
             type="time"
             style={inputStyle}
             value={time}
+            step={900}
             onChange={(e) => {
               resetMessages();
               setTime(e.target.value);

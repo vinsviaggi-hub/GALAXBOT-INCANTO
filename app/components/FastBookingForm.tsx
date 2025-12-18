@@ -10,7 +10,7 @@ export default function FastBookingForm() {
   const [phone, setPhone] = useState("");
   const [service, setService] = useState("");
   const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  const [time, setTime] = useState(""); // ORARIO PREFERITO (indicativo)
   const [notes, setNotes] = useState("");
 
   const [status, setStatus] = useState<Status>("idle");
@@ -21,14 +21,6 @@ export default function FastBookingForm() {
     setMessage("");
   }
 
-  // converte "HH:MM" in minuti
-  function timeToMinutes(t: string): number | null {
-    if (!t || t.length < 4) return null;
-    const [h, m] = t.split(":").map((x) => parseInt(x, 10));
-    if (Number.isNaN(h) || Number.isNaN(m)) return null;
-    return h * 60 + m;
-  }
-
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     resetMessages();
@@ -36,30 +28,6 @@ export default function FastBookingForm() {
     if (!name || !phone || !service || !date || !time) {
       setStatus("error");
       setMessage("Compila tutti i campi obbligatori contrassegnati con *.");
-      return;
-    }
-
-    // ✅ Controllo fasce orarie: 08:00–13:00 oppure 15:00–19:00
-    const minutes = timeToMinutes(time);
-    if (minutes === null) {
-      setStatus("error");
-      setMessage("Inserisci un orario valido.");
-      return;
-    }
-
-    const fromMorning = 8 * 60;
-    const toMorning = 13 * 60;
-    const fromAfternoon = 15 * 60;
-    const toAfternoon = 19 * 60;
-
-    const inMorning = minutes >= fromMorning && minutes <= toMorning;
-    const inAfternoon = minutes >= fromAfternoon && minutes <= toAfternoon;
-
-    if (!inMorning && !inAfternoon) {
-      setStatus("error");
-      setMessage(
-        "Gli orari prenotabili sono 8:00–13:00 e 15:00–19:00, come indicato nella sezione Orari di apertura."
-      );
       return;
     }
 
@@ -74,7 +42,7 @@ export default function FastBookingForm() {
           phone,
           service,
           date,
-          time,
+          time, // qui è "orario preferito"
           notes,
         }),
       });
@@ -86,7 +54,7 @@ export default function FastBookingForm() {
           setStatus("conflict");
           setMessage(
             data?.error ||
-              "Per questa data e ora c'è già una prenotazione. Scegli un altro orario."
+              "Abbiamo già una richiesta simile per quella data/ora. Scegli un altro orario indicativo."
           );
           return;
         }
@@ -94,19 +62,17 @@ export default function FastBookingForm() {
         setStatus("error");
         setMessage(
           data?.error ||
-            "Si è verificato un errore durante il salvataggio della prenotazione."
+            "Si è verificato un errore durante l’invio della richiesta."
         );
         return;
       }
 
-      // ✅ Tutto ok
       setStatus("success");
       setMessage(
         data?.message ||
-          "Prenotazione inviata con successo! Ti ricontatteremo per confermare l'appuntamento. 💅"
+          "Richiesta inviata! Ti ricontatteremo per confermare l’orario in base alla durata del trattamento. 💅"
       );
 
-      // Pulisco i campi
       setName("");
       setPhone("");
       setService("");
@@ -187,9 +153,11 @@ export default function FastBookingForm() {
       >
         Prenotazione veloce ✨
       </h2>
+
       <p style={helperStyle}>
-        Richiedi un appuntamento indicando i dati principali. Ti ricontatteremo
-        per confermare giorno e orario.
+        Inserisci i dati principali.{" "}
+        <strong>L’orario è indicativo</strong>: verrà confermato in base alla
+        durata del trattamento.
       </p>
 
       <form
@@ -245,11 +213,11 @@ export default function FastBookingForm() {
               resetMessages();
               setService(e.target.value);
             }}
-            placeholder="Es. trattamento viso, manicure, epilazione…"
+            placeholder="Es. manicure, epilazione, trattamento viso…"
           />
         </div>
 
-        {/* Data + Ora */}
+        {/* Data + Ora preferita */}
         <div
           style={{
             display: "grid",
@@ -274,15 +242,14 @@ export default function FastBookingForm() {
 
           <div>
             <label style={labelStyle}>
-              Ora <span style={{ color: "#b91c1c" }}>*</span>
+              Orario preferito (indicativo){" "}
+              <span style={{ color: "#b91c1c" }}>*</span>
             </label>
             <input
               type="time"
               style={inputStyle}
               value={time}
-              min="08:00"
-              max="19:00"
-              step={900} // 15 minuti
+              step={900} // 15 minuti va bene come preferenza
               onChange={(e) => {
                 resetMessages();
                 setTime(e.target.value);
@@ -301,7 +268,7 @@ export default function FastBookingForm() {
               resetMessages();
               setNotes(e.target.value);
             }}
-            placeholder="Es. preferisco il mattino, pelle sensibile, trattamento rilassante…"
+            placeholder="Es. preferisco mattina/pomeriggio, pelle sensibile, prima volta…"
           />
         </div>
 
@@ -329,11 +296,9 @@ export default function FastBookingForm() {
           {status === "loading" ? "Invio in corso…" : "Invia richiesta 💅"}
         </button>
 
-        {/* Messaggio dinamico */}
         {message && status !== "success" && (
           <p style={errorTextStyle}>{message}</p>
         )}
-
         {message && status === "success" && (
           <p style={successTextStyle}>{message}</p>
         )}
